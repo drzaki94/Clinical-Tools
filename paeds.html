@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KK Msia Paeds Calculator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+            --accent: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        /* Input Section */
+        .input-group {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            border: 2px solid var(--primary);
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Results Sections */
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .drug-name {
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .concentration {
+            font-size: 0.8rem;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .dose-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .dose-info {
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .dose-result {
+            text-align: right;
+        }
+
+        .vol {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .freq {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .warning {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .toggle-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            padding-bottom: 20px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Msia Paeds Dose & Fluid</h1>
+        <p class="subtitle">Quick Calc for Health Clinics (KK)</p>
+    </header>
+
+    <div class="input-group">
+        <label for="weight">Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 12.5" step="0.1" inputmode="decimal">
+    </div>
+
+    <div id="results" class="hidden">
+        
+        <div class="section-title">💧 Fluid Management</div>
+        
+        <div class="card">
+            <div class="drug-name">Maintenance Fluid (Holliday-Segar)</div>
+            <div class="dose-row">
+                <div class="dose-info">24 Hour Total</div>
+                <div class="dose-result">
+                    <span class="vol" id="fluid-total">0</span> <span class="freq">ml/day</span>
+                </div>
+            </div>
+            <div class="dose-row">
+                <div class="dose-info">Hourly Rate</div>
+                <div class="dose-result">
+                    <span class="vol" id="fluid-rate">0</span> <span class="freq">ml/hr</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">ORS (Plan B - Moderate Dehydration)</div>
+            <div class="dose-info" style="margin-top:5px">Total volume over 4 hours</div>
+            <div class="dose-row">
+                <div class="dose-info">75ml/kg</div>
+                <div class="dose-result">
+                    <span class="vol" id="ors-total">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">💊 Fever & Pain</div>
+
+        <div class="card">
+            <div class="drug-name">
+                Paracetamol (PCM)
+                <div class="toggle-container" style="margin-top:0; width: auto;">
+                    <button class="toggle-btn active" onclick="setConc('pcm', 120, this)">120mg/5ml</button>
+                    <button class="toggle-btn" onclick="setConc('pcm', 250, this)">250mg/5ml</button>
+                </div>
+            </div>
+            <div class="dose-row">
+                <div class="dose-info">15 mg/kg (Stat/QID)</div>
+                <div class="dose-result">
+                    <span class="vol" id="pcm-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+            <div class="warning">Max 4 doses in 24h. Use 250mg syrup if >15kg.</div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Ibuprofen <span class="concentration">100mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">10 mg/kg (TDS)</div>
+                <div class="dose-result">
+                    <span class="vol" id="ibu-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+            <div class="warning">Not for < 6 months or dehydrated/dengue susp.</div>
+        </div>
+
+        <div class="section-title">🦠 Antibiotics</div>
+
+        <div class="card">
+            <div class="drug-name">Amoxicillin <span class="concentration">125mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">15 mg/kg (TDS)</div>
+                <div class="dose-result">
+                    <span class="vol" id="amox-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+             <div class="dose-row" style="border-top: 1px dashed #eee; padding-top:5px; margin-top:5px;">
+                <div class="dose-info">High Dose (25mg/kg)</div>
+                <div class="dose-result">
+                    <span class="vol" id="amox-high-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Cloxacillin <span class="concentration">125mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">15 mg/kg (QID)</div>
+                <div class="dose-result">
+                    <span class="vol" id="clox-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+            <div class="dose-info" style="font-size:0.8rem; margin-top:4px;">Give 1 hour before food.</div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Erythromycin (ES) <span class="concentration">200mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">10 mg/kg (QID)</div>
+                <div class="dose-result">
+                    <span class="vol" id="ery-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+             <div class="dose-row" style="border-top: 1px dashed #eee; padding-top:5px; margin-top:5px;">
+                <div class="dose-info">20 mg/kg (BD)</div>
+                <div class="dose-result">
+                    <span class="vol" id="ery-bd-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Azithromycin <span class="concentration">200mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">10 mg/kg (OD)</div>
+                <div class="dose-result">
+                    <span class="vol" id="azi-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+            <div class="warning">For 3 days OR Day 1 (10mg/kg), D2-5 (5mg/kg).</div>
+        </div>
+
+        <div class="section-title">🫁 Respiratory & Other</div>
+
+        <div class="card">
+            <div class="drug-name">Salbutamol Syrup <span class="concentration">2mg/5ml</span></div>
+            <div class="dose-row">
+                <div class="dose-info">0.1 mg/kg (TDS)</div>
+                <div class="dose-result">
+                    <span class="vol" id="sal-vol">0</span> <span class="freq">ml</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Prednisolone <span class="concentration">5mg Tablet</span></div>
+            <div class="dose-row">
+                <div class="dose-info">1 mg/kg (Asthma)</div>
+                <div class="dose-result">
+                    <span class="vol" id="pred-dose">0</span> <span class="freq">mg</span>
+                </div>
+            </div>
+             <div class="dose-row">
+                <div class="dose-info">Tablets to crush:</div>
+                <div class="dose-result">
+                    <span class="vol" id="pred-tabs">0</span> <span class="freq">tabs</span>
+                </div>
+            </div>
+            <div class="warning">Max 40-60mg daily.</div>
+        </div>
+
+        <div class="card">
+            <div class="drug-name">Chlorpheniramine <span class="concentration">4mg Tablet</span></div>
+             <div class="dose-row">
+                <div class="dose-info">0.1 mg/kg (TDS)</div>
+                <div class="dose-result">
+                    <span class="vol" id="piriton-dose">0</span> <span class="freq">mg</span>
+                </div>
+            </div>
+            <div class="warning">Drowsy. Avoid if < 2 years (unless necessary).</div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Disclaimer: For educational use by healthcare professionals only. <br>Always verify doses with clinical judgement and local protocols (Blue Book).</p>
+    </footer>
+</div>
+
+<script>
+    const weightInput = document.getElementById('weight');
+    const resultsDiv = document.getElementById('results');
+
+    // Concentrations (mg per 5ml unless specified)
+    let pcmConc = 120; 
+
+    function setConc(drug, mg, btn) {
+        if(drug === 'pcm') {
+            pcmConc = mg;
+            // Update active button visual
+            const btns = btn.parentElement.getElementsByClassName('toggle-btn');
+            for(let b of btns) b.classList.remove('active');
+            btn.classList.add('active');
+            calculate();
+        }
+    }
+
+    weightInput.addEventListener('input', calculate);
+
+    function calculate() {
+        const w = parseFloat(weightInput.value);
+        
+        if (!w || w <= 0) {
+            resultsDiv.classList.add('hidden');
+            return;
+        }
+        resultsDiv.classList.remove('hidden');
+
+        // --- FLUIDS ---
+        // Holliday-Segar
+        let fluid = 0;
+        if (w <= 10) fluid = w * 100;
+        else if (w <= 20) fluid = 1000 + (w - 10) * 50;
+        else fluid = 1500 + (w - 20) * 20;
+
+        document.getElementById('fluid-total').textContent = Math.round(fluid);
+        document.getElementById('fluid-rate').textContent = (fluid / 24).toFixed(1);
+        document.getElementById('ors-total').textContent = Math.round(w * 75);
+
+        // --- DRUGS ---
+        // Helper for volume calculation: (Weight * Dose) / (Strength/5)
+        const calcVol = (dose, strength) => ((w * dose) / (strength / 5)).toFixed(1);
+        const calcMg = (dose) => (w * dose).toFixed(1);
+
+        // PCM
+        document.getElementById('pcm-vol').textContent = calcVol(15, pcmConc);
+
+        // Ibuprofen (100mg/5ml) - Dose 10mg/kg
+        document.getElementById('ibu-vol').textContent = calcVol(10, 100);
+
+        // Amoxicillin (125mg/5ml)
+        document.getElementById('amox-vol').textContent = calcVol(15, 125); // Standard
+        document.getElementById('amox-high-vol').textContent = calcVol(25, 125); // High dose
+
+        // Cloxacillin (125mg/5ml) - Dose 15mg/kg
+        document.getElementById('clox-vol').textContent = calcVol(15, 125);
+
+        // Erythromycin (200mg/5ml)
+        document.getElementById('ery-vol').textContent = calcVol(10, 200); // QID
+        document.getElementById('ery-bd-vol').textContent = calcVol(20, 200); // BD
+
+        // Azithromycin (200mg/5ml) - Dose 10mg/kg
+        document.getElementById('azi-vol').textContent = calcVol(10, 200);
+
+        // Salbutamol (2mg/5ml) - Dose 0.1mg/kg
+        document.getElementById('sal-vol').textContent = calcVol(0.1, 2);
+
+        // Prednisolone (5mg Tab) - Dose 1mg/kg (max 60)
+        let predDose = w * 1; 
+        if(predDose > 60) predDose = 60;
+        document.getElementById('pred-dose').textContent = predDose.toFixed(0);
+        
+        // Prednisolone tabs (nearest half)
+        let tabs = predDose / 5;
+        // Round to nearest 0.5
+        tabs = Math.round(tabs * 2) / 2;
+        document.getElementById('pred-tabs').textContent = tabs;
+
+        // Piriton (Chlorpheniramine) Dose 0.1mg/kg
+        let piritonDose = w * 0.1;
+        document.getElementById('piriton-dose').textContent = piritonDose.toFixed(2);
+    }
+</script>
+
+</body>
+</html>
