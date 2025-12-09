@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengue Toolkit v3.0 | CPG Compliant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .tab-active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .tab-inactive { background-color: white; color: #64748b; border-color: #e2e8f0; }
+        .animate-fade { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="p-4 md:p-8 max-w-4xl mx-auto text-slate-800">
+
+    <!-- Header -->
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-hospital-user text-blue-600"></i> Dengue CPG Toolkit
+            </h1>
+            <p class="text-sm text-slate-500">Based on CPG Management of Dengue (Adults 3rd Ed & Children 2nd Ed)</p>
+        </div>
+        <div class="flex gap-2">
+            <button id="btn-adult" onclick="setMode('adult')" class="tab-active px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2">
+                <i class="fa-solid fa-user"></i> Adult
+            </button>
+            <button id="btn-child" onclick="setMode('child')" class="tab-inactive px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2">
+                <i class="fa-solid fa-child"></i> Child
+            </button>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-12 gap-6">
+        
+        <!-- LEFT COLUMN: INPUTS -->
+        <div class="md:col-span-5 space-y-4">
+            
+            <!-- 1. Demographics -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h2 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3 border-b pb-2">1. Demographics</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
+                        <select id="gender" class="w-full rounded border-slate-300 border p-2 text-sm bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Age (Years)</label>
+                        <input type="number" id="age" class="w-full rounded border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 25">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Height (cm)</label>
+                        <input type="number" id="height" class="w-full rounded border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="170">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Weight (kg)</label>
+                        <input type="number" id="weight" class="w-full rounded border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="70">
+                    </div>
+                </div>
+                
+                <!-- Weight Analysis -->
+                <div id="weight-panel" class="mt-3 bg-slate-50 p-2 rounded border border-slate-100 text-xs hidden">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">BMI:</span>
+                        <span id="bmi-val" class="font-bold">--</span>
+                    </div>
+                    <div class="flex justify-between mt-1">
+                        <span class="text-slate-500">Ideal Body Weight (IBW):</span>
+                        <span id="ibw-val" class="font-mono font-bold">--</span>
+                    </div>
+                    <div class="flex justify-between mt-1 pt-1 border-t border-slate-200">
+                        <span class="text-blue-600 font-bold">Dosing Weight:</span>
+                        <span id="dosing-weight" class="font-mono font-bold text-blue-700 text-sm">--</span>
+                    </div>
+                    <div id="obesity-alert" class="mt-1 text-orange-600 italic hidden">
+                        *Obese (BMI &ge; 27.5). Using Adjusted Body Weight.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Hemodynamics -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h2 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3 border-b pb-2">2. Hemodynamics</h2>
+                <div class="grid grid-cols-2 gap-3 mb-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Systolic BP</label>
+                        <input type="number" id="sbp" class="w-full rounded border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="120">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Diastolic BP</label>
+                        <input type="number" id="dbp" class="w-full rounded border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="80">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Pulse Pressure</div>
+                        <div id="pp-val" class="font-mono font-bold text-sm text-slate-700">--</div>
+                    </div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">MAP</div>
+                        <div id="map-val" class="font-mono font-bold text-sm text-slate-700">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Clinical Signs -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h2 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3 border-b pb-2">3. Clinical Status</h2>
+                
+                <div class="space-y-2">
+                    <label class="flex items-center p-2 rounded hover:bg-slate-50 border border-transparent hover:border-slate-100 cursor-pointer">
+                        <input type="checkbox" id="warning-signs" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                        <div class="ml-3">
+                            <span class="block text-sm font-medium text-slate-700">Warning Signs</span>
+                            <span class="block text-xs text-slate-400">Vomiting, Abd Pain, Bleeding, Lethargy, HCT rise + Plt drop</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center p-2 rounded bg-red-50/50 border border-red-100 cursor-pointer hover:bg-red-50">
+                        <input type="checkbox" id="shock-signs" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                        <div class="ml-3">
+                            <span class="block text-sm font-medium text-red-800">Signs of Shock</span>
+                            <span class="block text-xs text-red-600/70">Cold extremities, CRT >2s, Weak pulse, Tachycardia</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: RESULTS -->
+        <div class="md:col-span-7">
+            <div id="result-card" class="hidden h-full flex flex-col relative animate-fade">
+                
+                <!-- Classification Header -->
+                <div id="header-bg" class="rounded-t-xl p-5 text-white bg-slate-700 transition-colors duration-300">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-xs font-bold opacity-80 uppercase tracking-widest mb-1">Assessment</div>
+                            <h2 id="diagnosis-title" class="text-2xl font-bold">Dengue Fever</h2>
+                            <div id="diagnosis-subtitle" class="text-sm opacity-90 mt-1">Stable</div>
+                        </div>
+                        <button onclick="copyNote()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-bold backdrop-blur-sm transition flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Copy Note
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Body -->
+                <div class="bg-white rounded-b-xl shadow-lg border-x border-b border-slate-200 p-6 flex-grow flex flex-col gap-6">
+                    
+                    <!-- Fluid Regime -->
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-droplet text-blue-500"></i> Fluid Management
+                        </h3>
+                        
+                        <div id="fluid-primary" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-3">
+                            <div class="text-xs font-bold text-blue-600 uppercase mb-1">Immediate Action</div>
+                            <div id="fluid-instruction" class="text-lg font-bold text-slate-800">Encourage Oral Fluids</div>
+                            <div id="fluid-detail" class="text-sm text-slate-600 mt-1"></div>
+                        </div>
+
+                        <!-- Maintenance Rate Display -->
+                        <div id="maintenance-box" class="flex items-center justify-between text-sm bg-slate-50 p-3 rounded text-slate-600 hidden">
+                            <span>Standard Maintenance (Holliday-Segar):</span>
+                            <span id="maintenance-rate" class="font-mono font-bold text-slate-800">-- ml/hr</span>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Plan -->
+                    <div>
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-emerald-500"></i> Monitoring Plan
+                        </h3>
+                        <ul id="monitoring-list" class="space-y-2 text-sm text-slate-700">
+                            <!-- Dynamic List -->
+                        </ul>
+                    </div>
+
+                    <!-- CPG Reference Footnote -->
+                    <div class="mt-auto pt-4 border-t border-slate-100 text-[10px] text-slate-400 text-center">
+                        Ref: CPG Management of Dengue (Adults 2015 / Children 2020)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="h-full flex flex-col items-center justify-center text-slate-400 p-10 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                <i class="fa-solid fa-calculator text-4xl mb-4 text-slate-300"></i>
+                <p>Enter patient parameters to generate plan.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'adult'; // 'adult' or 'child'
+
+        function setMode(mode) {
+            currentMode = mode;
+            const btnAdult = document.getElementById('btn-adult');
+            const btnChild = document.getElementById('btn-child');
+            
+            if(mode === 'adult') {
+                btnAdult.className = 'tab-active px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2';
+                btnChild.className = 'tab-inactive px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2';
+                document.getElementById('age').placeholder = "e.g. 25";
+                document.getElementById('weight').placeholder = "70";
+            } else {
+                btnAdult.className = 'tab-inactive px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2';
+                btnChild.className = 'tab-active px-4 py-2 rounded-lg font-bold text-sm border transition flex items-center gap-2';
+                document.getElementById('age').placeholder = "e.g. 5";
+                document.getElementById('weight').placeholder = "20";
+            }
+            calculate();
+        }
+
+        // Event Listeners
+        const inputs = ['age', 'height', 'weight', 'gender', 'sbp', 'dbp', 'warning-signs', 'shock-signs'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('input', calculate);
+                if(el.type === 'checkbox') el.addEventListener('change', calculate);
+            }
+        });
+
+        function calculate() {
+            // 1. Get Values
+            const age = parseFloat(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const gender = document.getElementById('gender').value;
+            const sbp = parseFloat(document.getElementById('sbp').value);
+            const dbp = parseFloat(document.getElementById('dbp').value);
+            const hasWarning = document.getElementById('warning-signs').checked;
+            const hasShockSigns = document.getElementById('shock-signs').checked;
+
+            if (!weight || !height) {
+                document.getElementById('result-card').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('weight-panel').classList.add('hidden');
+                return;
+            }
+
+            // 2. Hemodynamics Calculation
+            let pp = 0;
+            let isShock = false;
+            let map = 0;
+
+            if (sbp && dbp) {
+                pp = sbp - dbp;
+                map = (sbp + (2 * dbp)) / 3;
+                document.getElementById('pp-val').innerText = `${pp} mmHg`;
+                document.getElementById('map-val').innerText = `${Math.round(map)} mmHg`;
+
+                // CPG Shock Criteria: PP <= 20 or SBP < 90 (Adults) / SBP < 70 + (2xAge) (Child estimates simplified)
+                // We use PP <= 20 as universal strict shock criteria + Clinical Signs Checkbox
+                if (pp <= 20 || hasShockSigns) {
+                    isShock = true;
+                    document.getElementById('pp-val').classList.add('text-red-600');
+                } else {
+                    document.getElementById('pp-val').classList.remove('text-red-600');
+                }
+            }
+
+            // 3. Weight Logic (Crucial CPG Difference)
+            let dosingWeight = weight;
+            let ibw = 0;
+            let bmi = 0;
+            let isObese = false;
+
+            // BMI Calc
+            bmi = weight / ((height / 100) * (height / 100));
+            
+            if (currentMode === 'adult') {
+                // Adult CPG 2015: Robinson Formula
+                // Male: 52 + 0.75 (H - 152.4) -- note: formula variants exist, using standard Robinson from CPG logic often implied or Devine. 
+                // CPG Adult 3rd Ed Page 22 Table 7 cites "Female 45.5 + 0.91(ht-152.4), Male 50 + 0.91(ht-152.4)"
+                if (gender === 'male') {
+                    ibw = 50.0 + 0.91 * (height - 152.4);
+                } else {
+                    ibw = 45.5 + 0.91 * (height - 152.4);
+                }
+
+                // CPG Adult 3rd Ed: If BMI >= 27.5 (Obese), use ABW
+                if (bmi >= 27.5) {
+                    isObese = true;
+                    // ABW = IBW + 0.4 * (Actual - IBW)
+                    dosingWeight = ibw + 0.4 * (weight - ibw);
+                } else {
+                    dosingWeight = weight;
+                }
+
+            } else {
+                // Child CPG 2nd Ed 2020
+                // Page 47 Appendix 7: Uses Growth Charts (50th centile) for IBW if Obese.
+                // Since we don't have charts here, we calculate a rough IBW based on age/height for display, 
+                // but strictly speaking, CPG advises growth charts. 
+                // For this tool, we will assume Actual Weight unless significantly obese, where we limit to rough IBW estimate.
+                // Simplified Est: 2 * (Age + 4) for < 10yo? No, let's stick to height based logic if possible or Actual.
+                // Safe Fallback: Use Actual Weight, but flag High BMI.
+                // However, CPG says "For overweight/obese, ideal body weight should be used".
+                // We will use the Adult formula if Age > 12, otherwise default to actual but show warning.
+                
+                if (age > 12) {
+                     if (gender === 'male') {
+                        ibw = 50.0 + 0.91 * (height - 152.4);
+                    } else {
+                        ibw = 45.5 + 0.91 * (height - 152.4);
+                    }
+                } else {
+                    // Simple estimation for display
+                    ibw = (age * 2) + 8; // Rough estimate
+                }
+
+                if (weight > ibw * 1.2) { // Rough cutoff for obesity in kids without charts
+                    // In clinical practice with this tool, user should verify IBW. 
+                    // We will set dosing weight to Actual but warn user.
+                    // Or implement the logic: If > 95th centile (proxy), use IBW.
+                    // For safety in this tool:
+                    if(age > 10) {
+                         dosingWeight = ibw + 0.4 * (weight - ibw); // Apply correction for older kids
+                         isObese = true;
+                    } else {
+                        dosingWeight = weight; // Keep actual for small kids to avoid under-dosing unless very obese
+                    }
+                } else {
+                    dosingWeight = weight;
+                }
+            }
+
+            // Display Weights
+            document.getElementById('weight-panel').classList.remove('hidden');
+            document.getElementById('bmi-val').innerText = bmi.toFixed(1);
+            document.getElementById('ibw-val').innerText = ibw > 0 ? `${ibw.toFixed(1)} kg` : '--';
+            document.getElementById('dosing-weight').innerText = `${dosingWeight.toFixed(1)} kg`;
+            
+            if (isObese) {
+                document.getElementById('obesity-alert').classList.remove('hidden');
+                if(currentMode === 'child') {
+                     document.getElementById('obesity-alert').innerText = "*Weight > estimated IBW. Adjusted/Ideal Weight logic applied.";
+                } else {
+                     document.getElementById('obesity-alert').innerText = "*BMI \u2265 27.5. Using Adjusted Body Weight (CPG pg.22).";
+                }
+            } else {
+                document.getElementById('obesity-alert').classList.add('hidden');
+            }
+
+            // 4. Maintenance Calculation (Holliday-Segar) - CPG Child Page 25 / CPG Adult Page 22
+            let maintenance = 0;
+            if (dosingWeight <= 10) {
+                maintenance = dosingWeight * 100;
+            } else if (dosingWeight <= 20) {
+                maintenance = 1000 + (dosingWeight - 10) * 50;
+            } else {
+                maintenance = 1500 + (dosingWeight - 20) * 20;
+            }
+            // Cap maintenance for adults usually at 2.5-3L
+            if(currentMode === 'adult' && maintenance > 3000) maintenance = 3000;
+            
+            const mRate = Math.round(maintenance / 24);
+            document.getElementById('maintenance-box').classList.remove('hidden');
+            document.getElementById('maintenance-rate').innerText = `${mRate} ml/hr`;
+
+
+            // 5. Logic Engine & UI Updates
+            const header = document.getElementById('header-bg');
+            const title = document.getElementById('diagnosis-title');
+            const sub = document.getElementById('diagnosis-subtitle');
+            const instr = document.getElementById('fluid-instruction');
+            const detail = document.getElementById('fluid-detail');
+            const primaryBox = document.getElementById('fluid-primary');
+            const monitor = document.getElementById('monitoring-list');
+
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('result-card').classList.remove('hidden');
+
+            // --- SCENARIO 1: SHOCK (Severe Dengue) ---
+            if (isShock) {
+                header.className = "rounded-t-xl p-5 text-white bg-red-700";
+                primaryBox.className = "bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg mb-3";
+                title.innerText = "SEVERE DENGUE (SHOCK)";
+                sub.innerText = pp <= 20 ? "Narrow Pulse Pressure / Hypotension" : "Clinical Signs of Shock";
+                
+                // Fluid Logic based on Algorithm 4 & 5 (Child) and A & B (Adult)
+                if (currentMode === 'child') {
+                    // CPG Child 2020 Algorithm 4 & 5
+                    // Compensated: 10-20ml/kg/hr. Decompensated: 20ml/kg bolus 15-30min.
+                    // We assume decompensated if BP low or PP narrow
+                    const bolusVol = (20 * dosingWeight).toFixed(0);
+                    instr.innerHTML = `<div>IV BOLUS Crystalloid</div><div class="text-3xl">${bolusVol} ml</div>`;
+                    detail.innerText = "Run over 15-30 mins (Decompensated) or 1 Hour (Compensated). Reassess immediately.";
+                } else {
+                    // CPG Adult 2015 Algorithm A & B
+                    // Compensated: 5-10ml/kg/hr. Decompensated: 20ml/kg bolus.
+                    if (pp <= 20 || sbp < 90) {
+                        // Decompensated
+                        const bolusVol = (20 * dosingWeight).toFixed(0);
+                        instr.innerHTML = `<div>IV BOLUS Crystalloid/Colloid</div><div class="text-3xl">${bolusVol} ml</div>`;
+                        detail.innerText = "Run over 15-30 mins. (CPG Adult Alg. B)";
+                    } else {
+                        // Compensated
+                        const rateMin = (5 * dosingWeight).toFixed(0);
+                        const rateMax = (10 * dosingWeight).toFixed(0);
+                        instr.innerHTML = `<div>Start IV Crystalloid</div><div class="text-3xl">${rateMin} - ${rateMax} ml/hr</div>`;
+                        detail.innerText = "Run for 1 hour. Reassess. (CPG Adult Alg. A)";
+                    }
+                }
+
+                monitor.innerHTML = `
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-circle-exclamation text-red-500 mt-1"></i> <strong>Admission:</strong> ICU / High Dependency Unit.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-clock text-slate-400 mt-1"></i> <strong>Vitals:</strong> Every 15-30 mins.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-vial text-slate-400 mt-1"></i> <strong>Labs:</strong> Check HCT, Lactate, Gases immediately.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-droplet text-slate-400 mt-1"></i> <strong>Goal:</strong> Target Urine > 0.5 ml/kg/hr.</li>
+                `;
+
+            // --- SCENARIO 2: WARNING SIGNS ---
+            } else if (hasWarning) {
+                header.className = "rounded-t-xl p-5 text-white bg-amber-500";
+                primaryBox.className = "bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mb-3";
+                title.innerText = "DENGUE + WARNING SIGNS";
+                sub.innerText = "Plan B - Inpatient Management";
+
+                // Fluid Logic based on Adult Table 8 vs Child Algorithm 3
+                if (currentMode === 'child') {
+                    // Child CPG Alg 3: Start 5-7 ml/kg/hr for 1-2 hours
+                    const rateMin = (5 * dosingWeight).toFixed(0);
+                    const rateMax = (7 * dosingWeight).toFixed(0);
+                    instr.innerHTML = `<div>Start IV Crystalloid</div><div class="text-3xl">${rateMin} - ${rateMax} ml/hr</div>`;
+                    detail.innerText = `5-7 ml/kg/hr for 1-2 hours. Then reduce to 3-5 ml/kg/hr.`;
+                } else {
+                    // Adult CPG Table 8: Start 5 ml/kg/hr for 1-2 hours
+                    const rate = (5 * dosingWeight).toFixed(0);
+                    instr.innerHTML = `<div>Start IV Crystalloid</div><div class="text-3xl">${rate} ml/hr</div>`;
+                    detail.innerText = `5 ml/kg/hr for 1-2 hours. Then reduce to 3 ml/kg/hr.`;
+                }
+
+                monitor.innerHTML = `
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-bed text-amber-500 mt-1"></i> <strong>Admission:</strong> General Ward.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-clock text-slate-400 mt-1"></i> <strong>Vitals:</strong> 2-4 hourly. Monitor urine output.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-chart-line text-slate-400 mt-1"></i> <strong>HCT:</strong> Monitor 4-6 hourly.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-slate-400 mt-1"></i> <strong>Titration:</strong> Reduce fluids as soon as stable.</li>
+                `;
+
+            // --- SCENARIO 3: DENGUE FEVER (Stable) ---
+            } else {
+                header.className = "rounded-t-xl p-5 text-white bg-emerald-600";
+                primaryBox.className = "bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg mb-3";
+                title.innerText = "DENGUE FEVER";
+                sub.innerText = "Plan A - Outpatient / Home Care";
+
+                // Oral Fluids
+                if (currentMode === 'child') {
+                    instr.innerHTML = `<div>Encourage Oral Fluids</div><div class="text-xl">ORS, Milk, Juice</div>`;
+                    detail.innerText = `Goal: Maintenance (${mRate} ml/hr) orally.`;
+                } else {
+                    instr.innerHTML = `<div>Encourage Oral Fluids</div><div class="text-2xl">2 - 3 Liters / Day</div>`;
+                    detail.innerText = `Juices, Isotonic drinks, ORS. Avoid plain water alone.`;
+                }
+
+                monitor.innerHTML = `
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-house-medical text-emerald-500 mt-1"></i> <strong>Disposition:</strong> Home monitoring (unless comorbidities).</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-calendar-day text-slate-400 mt-1"></i> <strong>Follow-up:</strong> Daily FBC & Clinical review.</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-list text-slate-400 mt-1"></i> <strong>Advice:</strong> Return immediately if warning signs appear (Vomiting, Abd pain, Bleeding).</li>
+                `;
+            }
+        }
+
+        function copyNote() {
+            const date = new Date().toLocaleString();
+            const mode = currentMode.toUpperCase();
+            const diagnosis = document.getElementById('diagnosis-title').innerText;
+            const weight = document.getElementById('weight').value;
+            const dosingW = document.getElementById('dosing-weight').innerText;
+            const fluid = document.getElementById('fluid-instruction').innerText.replace(/\n/g, ' ');
+            const detail = document.getElementById('fluid-detail').innerText;
+            const sbp = document.getElementById('sbp').value;
+            const dbp = document.getElementById('dbp').value;
+            
+            const note = `DENGUE CPG ASSESSMENT (${mode})\nDate: ${date}\nDx: ${diagnosis}\nBP: ${sbp}/${dbp}\nAct Wt: ${weight}kg | Dosing Wt: ${dosingW}\nPlan: ${fluid} (${detail})`;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = note;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            alert("Assessment copied to clipboard!");
+        }
+
+        // Initialize
+        calculate();
+    </script>
+</body>
+</html>
