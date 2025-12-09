@@ -1,0 +1,16 @@
+{
+  "name": "Dr Z's Clinical Toolkit",
+  "short_name": "Clinical Tools",
+  "start_url": "/Clinical-Tools/",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#2563eb",
+  "scope": "/Clinical-Tools/",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
