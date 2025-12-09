@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MY Emergency Drug Calc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom tweaks for mobile usability */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .tap-target { min-height: 48px; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .mode-transition { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-10">
+
+    <!-- Header -->
+    <header id="header" class="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-50 mode-transition">
+        <div class="flex justify-between items-center max-w-4xl mx-auto">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">MY Emer. Drugs</h1>
+                <p class="text-xs opacity-80">Ref: MPLS / KKM / AHA 2025</p>
+            </div>
+            <button onclick="resetApp()" class="text-sm bg-white/20 px-3 py-1 rounded hover:bg-white/30 transition">Reset</button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-4">
+
+        <!-- Controls Section -->
+        <section class="bg-white rounded-xl shadow-md p-4 space-y-4">
+            
+            <!-- Mode Toggle -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-lg">
+                <button id="btn-ped" onclick="setMode('ped')" class="py-2 rounded-md font-bold text-sm transition-all shadow-sm bg-white text-blue-700 ring-1 ring-blue-700">Paediatric</button>
+                <button id="btn-adult" onclick="setMode('adult')" class="py-2 rounded-md font-bold text-sm text-slate-500 hover:bg-slate-200 transition-all">Adult</button>
+            </div>
+
+            <!-- Weight Input -->
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">Patient Weight (kg)</label>
+                <div class="flex gap-2">
+                    <button onclick="adjustWeight(-1)" class="w-12 bg-slate-200 rounded-lg text-xl font-bold active:bg-slate-300">-</button>
+                    <input type="number" id="weight" placeholder="0" class="flex-1 text-center text-3xl font-bold border-2 border-slate-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none" oninput="calculate()">
+                    <button onclick="adjustWeight(1)" class="w-12 bg-slate-200 rounded-lg text-xl font-bold active:bg-slate-300">+</button>
+                </div>
+                
+                <!-- Age Estimator (Only visible in Paediatric) -->
+                <div id="estimator-panel" class="pt-2">
+                    <button onclick="toggleEstimator()" class="text-xs text-blue-600 font-semibold underline decoration-dotted">Don't know weight? Estimate by Age</button>
+                    <div id="age-estimator" class="hidden mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-800 mb-2 font-bold">APLS Formula Estimation:</p>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <button onclick="setWeight(4, 0.5)" class="bg-white p-2 rounded border shadow-sm">0-6m<br><span class="text-slate-500">~4kg</span></button>
+                            <button onclick="setWeight(8, 1)" class="bg-white p-2 rounded border shadow-sm">1 yr<br><span class="text-slate-500">~10kg</span></button>
+                            <button onclick="setWeight(14, 3)" class="bg-white p-2 rounded border shadow-sm">3 yr<br><span class="text-slate-500">~14kg</span></button>
+                            <button onclick="setWeight(18, 5)" class="bg-white p-2 rounded border shadow-sm">5 yr<br><span class="text-slate-500">~18kg</span></button>
+                            <button onclick="setWeight(23, 7)" class="bg-white p-2 rounded border shadow-sm">7 yr<br><span class="text-slate-500">~23kg</span></button>
+                            <button onclick="setWeight(30, 9)" class="bg-white p-2 rounded border shadow-sm">9 yr<br><span class="text-slate-500">~30kg</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Warning Banner -->
+            <div id="safety-warning" class="hidden bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-3 text-xs rounded" role="alert">
+                <p class="font-bold">Caution</p>
+                <p>Weight > 50kg. Adult dosing protocol applied for safety.</p>
+            </div>
+        </section>
+
+        <!-- Dynamic Results Container -->
+        <div id="results-container" class="space-y-6">
+            
+            <!-- RESUSCITATION (Red) -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-red-600 border-b border-red-200 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    Cardiac Arrest / SVT
+                </h3>
+                <div id="list-resus" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- ANAPHYLAXIS (Orange) -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-orange-600 border-b border-orange-200 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Anaphylaxis
+                </h3>
+                <div id="list-anaph" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- RESPIRATORY / ASTHMA (Purple - NEW) -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-600 border-b border-indigo-200 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Asthma / Respiratory
+                </h3>
+                <div id="list-resp" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- AIRWAY / RSI (Blue) -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    Airway / RSI / Seizure
+                </h3>
+                <div id="list-airway" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- FLUIDS & METABOLIC (Green) -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-green-600 border-b border-green-200 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Fluids, Metabolic & Pain
+                </h3>
+                <div id="list-other" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Disclaimer -->
+    <footer class="text-center text-[10px] text-slate-400 p-6 max-w-4xl mx-auto border-t mt-8">
+        <p class="font-bold text-slate-500 mb-1">CLINICAL AID ONLY - NOT MEDICAL ADVICE</p>
+        <p>Values based on standard Malaysian (MPLS) & International (AHA/ILCOR) guidelines. <strong>Always check the ampoule.</strong> Use clinical judgement.</p>
+    </footer>
+
+    <script>
+        // --- DATA CONFIGURATION (MALAYSIAN CONTEXT / MPLS) ---
+        const drugData = [
+            // --- RESUS / SVT ---
+            {
+                id: 'adrenaline_cpr',
+                name: 'Adrenaline (CPR)',
+                category: 'resus',
+                dose_ped: 0.01, // mg/kg (10mcg/kg) [MPLS Pg 26]
+                dose_ped_unit: 'mg/kg',
+                max_ped: 1, // Max 1mg
+                conc_str: '1:10,000 (0.1mg/mL)',
+                conc_val: 0.1, 
+                notes: 'IV/IO push every 3-5 mins',
+                adult_dose_fixed: '1 mg',
+                adult_vol_fixed: '10 mL (1:10,000)'
+            },
+            {
+                id: 'amiodarone',
+                name: 'Amiodarone',
+                category: 'resus',
+                dose_ped: 5, // mg/kg [MPLS Pg 26]
+                dose_ped_unit: 'mg/kg',
+                max_ped: 300,
+                conc_str: 'Standard (50mg/mL)',
+                conc_val: 50,
+                notes: 'Shock-refractory VF/pVT. Rapid Bolus.',
+                adult_dose_fixed: '300 mg',
+                adult_vol_fixed: '6 mL'
+            },
+            {
+                id: 'adenosine',
+                name: 'Adenosine (SVT)',
+                category: 'resus',
+                dose_ped: 0.1, // 0.1 mg/kg
+                dose_ped_unit: 'mg/kg',
+                max_ped: 6, // 1st dose max 6mg
+                conc_str: '3mg/mL (Vial)',
+                conc_val: 3,
+                notes: 'Rapid IV bolus. 2nd dose: 0.2mg/kg (max 12mg).',
+                adult_dose_fixed: '6 mg',
+                adult_vol_fixed: '2 mL'
+            },
+            {
+                id: 'atropine',
+                name: 'Atropine',
+                category: 'resus',
+                dose_ped: 0.02,
+                dose_ped_unit: 'mg/kg',
+                min_ped_abs: 0.1,
+                max_ped: 0.6,
+                conc_str: '600mcg/mL or 1mg/mL',
+                conc_val: 0.6,
+                notes: 'Min dose 0.1mg. Max single 0.6mg.',
+                adult_dose_fixed: '0.6 - 1.0 mg',
+                adult_vol_fixed: '-'
+            },
+            {
+                id: 'defib',
+                name: 'Defibrillation (Shock)',
+                category: 'resus',
+                dose_ped: 4, // J/kg [MPLS Pg 26]
+                dose_ped_unit: 'Joules/kg',
+                max_ped: 200, 
+                conc_str: 'Manual Defib',
+                conc_val: null, 
+                notes: 'Initial shock 4 J/kg',
+                adult_dose_fixed: '150 - 200 J',
+                adult_vol_fixed: 'Biphasic'
+            },
+
+            // --- ANAPHYLAXIS ---
+            {
+                id: 'adren_im',
+                name: 'Adrenaline (IM Anaph)',
+                category: 'anaph',
+                dose_ped: 0.01,
+                dose_ped_unit: 'mg/kg',
+                max_ped: 0.5,
+                conc_str: '1:1000 (1mg/mL)',
+                conc_val: 1,
+                notes: 'Anterolateral thigh. MPLS Pre-hosp Ref: <6y: 0.15ml, 6-12y: 0.3ml, >12y: 0.5ml.',
+                adult_dose_fixed: '0.5 mg',
+                adult_vol_fixed: '0.5 mL'
+            },
+            {
+                id: 'hydrocort',
+                name: 'Hydrocortisone',
+                category: 'anaph',
+                dose_ped: 4, // 4mg/kg
+                dose_ped_unit: 'mg/kg',
+                max_ped: 200,
+                conc_str: '100mg/vial',
+                conc_val: 50, 
+                notes: 'IV Slow. MPLS Ref: <6m: 25mg, 6m-6y: 50mg, 6-12y: 100mg.',
+                adult_dose_fixed: '200 mg',
+                adult_vol_fixed: '2 Vials'
+            },
+
+            // --- RESPIRATORY / ASTHMA ---
+            {
+                id: 'mag_sulph',
+                name: 'Magnesium Sulphate (IV)',
+                category: 'resp',
+                dose_ped: 50, // 50mg/kg
+                dose_ped_unit: 'mg/kg',
+                max_ped: 2000, // Max 2g
+                conc_str: '50% Sol (0.5g/mL)',
+                conc_val: 500, 
+                notes: 'Severe Asthma. Infuse over 20 mins. Watch BP.',
+                adult_dose_fixed: '1.2 - 2 g',
+                adult_vol_fixed: '2.4 - 4 mL'
+            },
+            {
+                id: 'hydrocort_resp',
+                name: 'Hydrocortisone (Asthma)',
+                category: 'resp',
+                dose_ped: 4, // 4mg/kg
+                dose_ped_unit: 'mg/kg',
+                max_ped: 200,
+                conc_str: '100mg/vial',
+                conc_val: 50,
+                notes: 'IV/IM. Early administration in acute asthma.',
+                adult_dose_fixed: '200 mg',
+                adult_vol_fixed: '2 Vials'
+            },
+             {
+                id: 'salbutamol',
+                name: 'Salbutamol (Neb)',
+                category: 'resp',
+                dose_ped: 0, // Special handling
+                dose_ped_unit: 'mg',
+                max_ped: 5,
+                conc_str: 'Nebuliser Sol.',
+                conc_val: null,
+                notes: '<5 yrs: 2.5mg. >5 yrs: 5mg. Repeat every 20m.',
+                adult_dose_fixed: '5 mg',
+                adult_vol_fixed: 'Neb'
+            },
+
+            // --- AIRWAY / SEIZURE ---
+            {
+                id: 'midaz',
+                name: 'Midazolam (Seizure)',
+                category: 'airway',
+                dose_ped: 0.15,
+                dose_ped_unit: 'mg/kg',
+                max_ped: 10,
+                conc_str: '5mg/mL (or 1mg/mL)',
+                conc_val: 5, 
+                notes: 'IV. If Buccal/IN use 0.3-0.5mg/kg.',
+                adult_dose_fixed: '5 mg',
+                adult_vol_fixed: '1 mL'
+            },
+            {
+                id: 'diazepam',
+                name: 'Diazepam (PR)',
+                category: 'airway',
+                dose_ped: 0.5,
+                dose_ped_unit: 'mg/kg',
+                max_ped: 10,
+                conc_str: 'Rectal Tube',
+                conc_val: null,
+                notes: 'Per Rectal (if no IV access)',
+                adult_dose_fixed: '10 mg',
+                adult_vol_fixed: '1 Tube'
+            },
+
+            // --- FLUIDS, METABOLIC & PAIN ---
+            {
+                id: 'd10',
+                name: 'Dextrose 10% (Hypo)',
+                category: 'other',
+                dose_ped: 2, // 2 ml/kg [MPLS Pg 24]
+                dose_ped_unit: 'mL/kg',
+                max_ped: 500,
+                conc_str: 'D10% Solution',
+                conc_val: null, // Volume based
+                notes: 'Hypoglycemia. 2 ml/kg IV stat. Recheck BSL.',
+                adult_dose_fixed: '150 - 200 mL',
+                adult_vol_fixed: 'Stat'
+            },
+            {
+                id: 'fluid_bolus',
+                name: 'Fluid Bolus (NS)',
+                category: 'other',
+                dose_ped: 10, // 10 ml/kg [MPLS Pg 17]
+                dose_ped_unit: 'mL/kg',
+                max_ped: 1000,
+                conc_str: 'Normal Saline 0.9%',
+                conc_val: null,
+                notes: 'Shock: 10 mL/kg stat. Repeat if needed (Max 40-60).',
+                adult_dose_fixed: '500 mL',
+                adult_vol_fixed: 'Stat'
+            }
+        ];
+
+        // --- STATE & LOGIC ---
+        let currentMode = 'ped'; // 'ped' or 'adult'
+        let currentWeight = 0;
+
+        function setMode(mode) {
+            currentMode = mode;
+            const header = document.getElementById('header');
+            const btnPed = document.getElementById('btn-ped');
+            const btnAdult = document.getElementById('btn-adult');
+            const estimator = document.getElementById('estimator-panel');
+
+            if (mode === 'ped') {
+                header.classList.remove('bg-emerald-700');
+                header.classList.add('bg-blue-700');
+                
+                btnPed.classList.add('bg-white', 'text-blue-700', 'ring-1', 'ring-blue-700', 'shadow-sm');
+                btnPed.classList.remove('text-slate-500', 'hover:bg-slate-200');
+                
+                btnAdult.classList.remove('bg-white', 'text-emerald-700', 'ring-1', 'ring-emerald-700', 'shadow-sm');
+                btnAdult.classList.add('text-slate-500', 'hover:bg-slate-200');
+
+                estimator.classList.remove('hidden');
+            } else {
+                header.classList.remove('bg-blue-700');
+                header.classList.add('bg-emerald-700');
+
+                btnAdult.classList.add('bg-white', 'text-emerald-700', 'ring-1', 'ring-emerald-700', 'shadow-sm');
+                btnAdult.classList.remove('text-slate-500', 'hover:bg-slate-200');
+
+                btnPed.classList.remove('bg-white', 'text-blue-700', 'ring-1', 'ring-blue-700', 'shadow-sm');
+                btnPed.classList.add('text-slate-500', 'hover:bg-slate-200');
+
+                estimator.classList.add('hidden');
+                document.getElementById('age-estimator').classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function adjustWeight(amount) {
+            const input = document.getElementById('weight');
+            let val = parseFloat(input.value) || 0;
+            val += amount;
+            if (val < 0) val = 0;
+            input.value = val;
+            calculate();
+        }
+
+        function setWeight(w, ageMonths) {
+            document.getElementById('weight').value = w;
+            toggleEstimator(); // Hide after selection
+            calculate();
+        }
+
+        function toggleEstimator() {
+            const el = document.getElementById('age-estimator');
+            el.classList.toggle('hidden');
+        }
+
+        function resetApp() {
+            document.getElementById('weight').value = '';
+            setMode('ped');
+            calculate();
+        }
+
+        function calculate() {
+            const weightInput = document.getElementById('weight').value;
+            currentWeight = parseFloat(weightInput) || 0; // Default to 0 if empty
+            
+            const resultsContainer = document.getElementById('results-container');
+            const warning = document.getElementById('safety-warning');
+
+            // ALWAYS SHOW RESULTS
+            resultsContainer.classList.remove('hidden');
+            
+            // Safety Warning Logic
+            let forceAdultLimit = false;
+            if (currentMode === 'ped' && currentWeight >= 50) {
+                warning.classList.remove('hidden');
+                forceAdultLimit = true;
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            renderCategory('list-resus', 'resus', forceAdultLimit);
+            renderCategory('list-anaph', 'anaph', forceAdultLimit);
+            renderCategory('list-resp', 'resp', forceAdultLimit);
+            renderCategory('list-airway', 'airway', forceAdultLimit);
+            renderCategory('list-other', 'other', forceAdultLimit);
+        }
+
+        function renderCategory(elementId, catFilter, forceAdultLimit) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+
+            const filtered = drugData.filter(d => d.category === catFilter);
+
+            filtered.forEach(drug => {
+                let doseDisplay = '';
+                let volDisplay = '';
+                let limitMsg = '';
+
+                if (currentMode === 'adult') {
+                    doseDisplay = drug.adult_dose_fixed;
+                    volDisplay = drug.adult_vol_fixed;
+                } else {
+                    // PAEDIATRIC LOGIC
+                    
+                    if (currentWeight <= 0) {
+                        // NO WEIGHT ENTERED - SHOW PROTOCOL / REFERENCE
+                        if (drug.id === 'salbutamol') {
+                            doseDisplay = '2.5 / 5 mg';
+                            volDisplay = 'Neb';
+                        } else {
+                            // Display the per-kg dose formula (e.g., "0.01 mg/kg")
+                            doseDisplay = `${drug.dose_ped} ${drug.dose_ped_unit}`;
+                            
+                            // Display the concentration if available in the volume slot
+                            if (drug.conc_str) {
+                                volDisplay = `<span class="text-xs text-slate-500 font-normal block">${drug.conc_str}</span>`;
+                            } else {
+                                volDisplay = '-';
+                            }
+                        }
+                    } 
+                    else {
+                        // WEIGHT ENTERED - CALCULATE
+                        let finalWeight = currentWeight;
+                        
+                        // Special case: Salbutamol
+                        if (drug.id === 'salbutamol') {
+                            doseDisplay = finalWeight < 20 ? '2.5 mg' : '5 mg';
+                            volDisplay = 'Nebuliser';
+                        } 
+                        else if (drug.dose_ped_unit === 'mL/kg') {
+                            // Volume based drugs (Fluids, D10)
+                            let calcVol = finalWeight * drug.dose_ped;
+                            if (calcVol > drug.max_ped) calcVol = drug.max_ped;
+                            doseDisplay = Math.round(calcVol) + ' mL';
+                            volDisplay = 'Stat';
+                        }
+                        else {
+                            // Weight based mg/mcg
+                            let calcDose = finalWeight * drug.dose_ped;
+                            
+                            // Check caps
+                            let isCapped = false;
+                            if (calcDose > drug.max_ped) {
+                                calcDose = drug.max_ped;
+                                isCapped = true;
+                            }
+
+                            // Format Dose
+                            if (drug.dose_ped_unit.includes('mcg')) {
+                                doseDisplay = Math.round(calcDose) + ' mcg';
+                            } else if (drug.id === 'defib') {
+                                doseDisplay = Math.round(calcDose) + ' Joules';
+                            } else {
+                                doseDisplay = Number(calcDose.toFixed(2)) + ' mg';
+                            }
+
+                            // Calculate Volume
+                            if (drug.conc_val) {
+                                let vol = calcDose / drug.conc_val;
+                                
+                                if (vol < 0.1) volDisplay = vol.toFixed(2) + ' mL';
+                                else if (vol < 1) volDisplay = vol.toFixed(2) + ' mL';
+                                else volDisplay = vol.toFixed(1) + ' mL';
+
+                                volDisplay += `<span class="text-xs text-slate-500 block font-normal">(${drug.conc_str})</span>`;
+                            } else {
+                                volDisplay = '-';
+                            }
+
+                            if (isCapped) {
+                                limitMsg = `<span class="text-[10px] bg-red-100 text-red-700 px-1 rounded ml-2">MAX DOSE</span>`;
+                            }
+                        }
+                    }
+                }
+
+                // Create Card HTML
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-lg p-3 shadow-sm flex justify-between items-center";
+                
+                const highlightColor = currentMode === 'ped' ? 'text-blue-900' : 'text-emerald-900';
+                
+                card.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center">
+                            <h4 class="font-bold ${highlightColor} text-base">${drug.name}</h4>
+                            ${limitMsg}
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${drug.notes}</p>
+                    </div>
+                    <div class="text-right pl-4 border-l border-slate-100 ml-2 min-w-[100px]">
+                        <div class="text-xl font-black text-slate-800 leading-none">${doseDisplay}</div>
+                        <div class="text-sm font-semibold text-blue-600 mt-1 leading-tight">${volDisplay}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Init
+        setMode('ped');
+    </script>
+</body>
+</html>
