@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr Z's Clinical Toolkit</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .logo-container { text-align: center; margin-bottom: 20px; }
+        
+        /* The Grid of Buttons */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 12px; 
+            text-align: center; text-decoration: none; color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        /* Utility for disabled cards */
+        .card.disabled {
+            opacity: 0.6;
+            cursor: default;
+            pointer-events: none; /* Prevents clicking and hover effects */
+        }
+        
+        .icon { font-size: 40px; margin-bottom: 10px; }
+        .icon-svg { width: 48px; height: 48px; margin-bottom: 10px; fill: currentColor; color: #333; }
+        .label { font-weight: bold; font-size: 1.1em; }
+        .sub { font-size: 0.8em; color: #777; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <svg width="110" height="110" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 95C20 80 10 35 10 15L90 15C90 35 80 80 50 95Z" fill="#2563eb"/>
+            <path d="M50 95C20 80 10 35 10 15L50 15V95Z" fill="black" fill-opacity="0.1"/>
+            <rect x="38" y="25" width="24" height="60" rx="4" fill="white"/>
+            <rect x="20" y="43" width="60" height="24" rx="4" fill="white"/>
+            <text x="50" y="64" font-family="Arial, sans-serif" font-size="32" font-weight="900" fill="#2563eb" text-anchor="middle">Z</text>
+        </svg>
+        <h1 style="margin-top: 10px; font-size: 1.5rem; color: #1e3a8a;">Dr Z's Clinical Toolkit</h1>
+    </div>
+    
+    <div class="menu-grid">
+        <a href="dengue.html" class="card">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#d63031" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+                <path d="M12 2v6"></path>
+                <path d="M12 12v1"></path>
+                <path d="M16 5l-4 4-4-4"></path>
+                <path d="M4 14h6"></path>
+                <path d="M14 14h6"></path>
+                <path d="M15 7l5-2"></path>
+                <path d="M9 7L4 5"></path>
+            </svg>
+            <span class="label">Dengue Guide</span>
+            <span class="sub">Fluid & Warning Signs</span>
+        </a>
+
+        <a href="emergency.html" class="card">
+            <span class="icon">🚨</span>
+            <span class="label">CPR / Resus</span>
+            <span class="sub">Emergency Drugs</span>
+        </a>
+
+        <a href="paeds.html" class="card">
+            <span class="icon">👶</span>
+            <span class="label">Paeds Dosing</span>
+            <span class="sub">Weight-based Calc</span>
+        </a>
+        
+        <a href="antibiotics.html" class="card">
+            <span class="icon">💊</span>
+            <span class="label">Antibiotics</span>
+            <span class="sub">Common Guidelines</span>
+        </a>
+
+        <a href="kbm.html" class="card">
+            <span class="icon">🚭</span>
+            <span class="label">Quit Smoking</span>
+            <span class="sub">KBM Clinic</span>
+        </a>
+
+        <a href="ncd.html" class="card">
+            <span class="icon">❤️</span>
+            <span class="label">NCD</span>
+            <span class="sub">Guidelines</span>
+        </a>
+
+        <a href="mch.html" class="card">
+            <span class="icon">🤰</span>
+            <span class="label">MCH Toolkit</span>
+            <span class="sub">Guidelines</span>
+        </a>
+    </div>
+    
+    <p style="text-align:center; margin-top:30px; color:#999; font-size:0.8em;">
+        Internal Use Only • v1.1
+    </p>
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker Registered', reg))
+        .catch((err) => console.log('Service Worker Failed', err));
+    });
+  }
+</script>
+
+</body>
+</html>
