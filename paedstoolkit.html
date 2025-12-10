@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paeds Toolkit</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #00897b;
+            --light: #e0f2f1;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --text: #333;
+            --border: #ddd;
+            --header-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom: 4px solid var(--accent);
+            background-color: #f8fcfd;
+        }
+        .tab-btn:hover { background-color: #f9f9f9; }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            min-height: 80vh;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.2s ease-in;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Panels */
+        .calc-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            background: white;
+            box-sizing: border-box;
+        }
+        button.calc-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button.calc-btn:hover { background-color: #00796b; }
+
+        /* Results Grid */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .result-card {
+            background: white;
+            padding: 15px;
+            border-left: 5px solid var(--accent);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .result-card.danger-sign { border-left-color: var(--danger); }
+        .result-card.warning-sign { border-left-color: var(--warning); }
+        
+        .result-card h3 {
+            margin: 0 0 10px;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .result-sub {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: normal;
+        }
+        .result-note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Jaundice Specifics */
+        .risk-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #ffe0b2;
+            display: none;
+        }
+        .risk-box label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .risk-box input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        .risk-list {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            padding-left: 30px;
+        }
+
+        /* Tables & Grouping */
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            color: #999;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            table-layout: fixed; /* Ensures even distribution */
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: var(--header-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* Group Header Styles */
+        .group-header {
+            background-color: #f1f8e9; 
+            color: var(--primary);
+            font-weight: bold;
+            border-top: 2px solid #ddd;
+        }
+        .group-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-blood { background: #ffebee; color: #c0392b; }
+        .badge-chem { background: #e8f6f3; color: #16a085; }
+        .badge-gas { background: #e3f2fd; color: #1565c0; }
+        .badge-endo { background: #f3e5f5; color: #8e24aa; }
+
+        tr.data-row:hover { background-color: #fafafa; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 0.8rem;
+            color: #95a5a6;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Paeds Toolkit</h1>
+    <p>Clinical Reference & Calculators</p>
+</header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('vitals', event)">Vitals & Growth</button>
+    <button class="tab-btn" onclick="switchTab('jaundice', event)">Jaundice (NNJ)</button>
+    <button class="tab-btn" onclick="switchTab('labs', event)">Lab Reference</button>
+</div>
+
+<div class="container">
+
+    <!-- TAB 1: VITALS CALCULATOR -->
+    <div id="vitals" class="tab-content active">
+        <div class="calc-panel">
+            <div class="input-group">
+                <label>Patient Age</label>
+                <div class="input-row">
+                    <input type="number" id="ageVal" placeholder="0" min="0" oninput="calculateVitals()">
+                    <select id="ageUnit" onchange="calculateVitals()">
+                        <option value="years">Years</option>
+                        <option value="months">Months</option>
+                        <option value="days">Days (Newborn)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calculateVitals()">Calculate Vitals</button>
+        </div>
+
+        <div id="vitalsResults" style="display:none;">
+            <div class="result-grid">
+                <!-- Weight -->
+                <div class="result-card">
+                    <h3>Est. Weight</h3>
+                    <div class="result-value" id="resWeight">-</div>
+                    <div class="result-note" id="resWeightNote"></div>
+                </div>
+
+                <!-- HR -->
+                <div class="result-card">
+                    <h3>Heart Rate</h3>
+                    <div class="result-value" id="resHR">-</div>
+                    <div class="result-sub">at rest (bpm)</div>
+                </div>
+
+                <!-- RR -->
+                <div class="result-card">
+                    <h3>Resp. Rate</h3>
+                    <div class="result-value" id="resRR">-</div>
+                    <div class="result-sub">at rest (bpm)</div>
+                </div>
+
+                <!-- BP -->
+                <div class="result-card danger-sign">
+                    <h3>Min Systolic BP</h3>
+                    <div class="result-value" id="resBP">-</div>
+                    <div class="result-sub" style="color:var(--danger); font-weight:bold;">5th Centile (Danger)</div>
+                </div>
+                
+                <!-- Growth -->
+                <div class="result-card">
+                    <h3>Growth Ref</h3>
+                    <div class="result-value" id="resGrowth">-</div>
+                    <div class="result-note" id="resGrowthNote"></div>
+                </div>
+            </div>
+            
+             <div style="margin-top: 20px; background: #fff; padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+                <h3 style="margin-top:0;">Haematology Quick Look</h3>
+                <ul id="haemQuickLook" style="padding-left: 20px; margin: 0; color: #555;"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: JAUNDICE CALCULATOR -->
+    <div id="jaundice" class="tab-content">
+        <div class="calc-panel">
+            <div class="input-group">
+                <label>Gestation at Birth (Weeks)</label>
+                <select id="gestation" onchange="toggleRiskVisibility()">
+                    <option value="38">≥ 38 Weeks</option>
+                    <option value="37">37 Weeks</option>
+                    <option value="36">36 Weeks</option>
+                    <option value="35">35 Weeks</option>
+                    <option disabled>--- Preterm ---</option>
+                    <option value="34">34 Weeks</option>
+                    <option value="33">33 Weeks</option>
+                    <option value="32">32 Weeks</option>
+                    <option value="31">31 Weeks</option>
+                    <option value="30">30 Weeks</option>
+                    <option value="29">29 Weeks</option>
+                </select>
+            </div>
+
+            <div id="riskContainer" class="risk-box">
+                <label>
+                    <input type="checkbox" id="neuroRisk">
+                    <strong>Has Neurotoxicity Risk Factors?</strong>
+                </label>
+                <div class="risk-list">
+                    Include: Isoimmune haemolytic disease, G6PD deficiency, Sepsis, Clinical Instability, Albumin < 30g/L.
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Age (Hours of Life)</label>
+                <select id="jaundiceHours">
+                    <option value="6">~ 6 Hours</option>
+                    <option value="12">~ 12 Hours</option>
+                    <option value="24">~ 24 Hours</option>
+                    <option value="48">~ 48 Hours</option>
+                    <option value="72">~ 72 Hours</option>
+                    <option value="96">~ 96 Hours</option>
+                    <option value="120">≥ 120 Hours (5 Days)</option>
+                </select>
+                <small style="color:#777;">*Select nearest checkpoint provided in protocol.</small>
+            </div>
+
+            <button class="calc-btn" onclick="calculateJaundice()">Get Thresholds</button>
+        </div>
+
+        <div id="jaundiceResults" style="display:none;">
+            <div class="result-grid">
+                <div class="result-card warning-sign">
+                    <h3>Phototherapy Threshold</h3>
+                    <div class="result-value" id="ptResult">-</div>
+                    <div class="result-note">Start Intensive PT if 50 µmol/L (3 mg/dL) above this line.</div>
+                </div>
+
+                <div class="result-card danger-sign">
+                    <h3>Exchange Transfusion</h3>
+                    <div class="result-value" id="etResult">-</div>
+                    <div class="result-note">Urgent referral required if TSB exceeds this.</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 0.85rem; color: #666; background: #fff; padding:10px; border:1px solid #eee;">
+                <strong>Note:</strong> Data adapted from Malaysian Paediatric Protocols (5th Ed).<br>
+                Always correlate with clinical signs of Acute Bilirubin Encephalopathy (ABE).
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: LAB REFERENCE -->
+    <div id="labs" class="tab-content">
+        <div class="search-container">
+            <input type="text" id="labSearch" onkeyup="filterLabs()" placeholder="Search test name, category, or age (e.g. Glucose, Chem, Cord)...">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table id="labTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Age Group</th>
+                        <th style="width: 30%;">Range</th>
+                        <th style="width: 30%;">Units</th>
+                    </tr>
+                </thead>
+                <!-- Rows will be appended directly here by JS -->
+            </table>
+        </div>
+        <p style="font-size: 0.8rem; margin-top: 10px; color: #888;">* Sourced from PedSAP, Haematological Parameters & Standard Endocrine Textbooks.</p>
+    </div>
+
+</div>
+
+<footer>
+    <p><strong>Disclaimer:</strong> This tool is for professional educational reference only. Ensure all calculations are verified against local clinical guidelines.</p>
+</footer>
+
+<script>
+    // --- JAUNDICE DATA ---
+    const jaundiceData = {
+        "38": {
+            noRisk: { "6": {pt: "101 (5.9)", et: "321 (18.8)"}, "12": {pt: "121 (7.1)", et: "337 (19.7)"}, "24": {pt: "159 (9.3)", et: "366 (21.4)"}, "48": {pt: "222 (13.0)", et: "410 (24.0)"}, "72": {pt: "270 (15.8)", et: "443 (25.9)"}, "96": {pt: "303 (17.7)", et: "462 (27.0)"}, "120": {pt: "306 (17.9)", et: "462 (27.0)"} },
+            risk: { "6": {pt: "74 (4.3)", et: "265 (15.5)"}, "12": {pt: "94 (5.5)", et: "279 (16.3)"}, "24": {pt: "128 (7.5)", et: "303 (17.7)"}, "48": {pt: "188 (11.0)", et: "344 (20.1)"}, "72": {pt: "232 (13.6)", et: "378 (22.1)"}, "96": {pt: "260 (15.2)", et: "402 (23.5)"}, "120": {pt: "260 (15.2)", et: "402 (23.5)"} }
+        },
+        "37": {
+            noRisk: { "6": {pt: "94 (5.5)", et: "304 (17.8)"}, "12": {pt: "113 (6.6)", et: "320 (18.7)"}, "24": {pt: "149 (8.7)", et: "347 (20.3)"}, "48": {pt: "212 (12.4)", et: "395 (23.1)"}, "72": {pt: "258 (15.1)", et: "431 (25.2)"}, "96": {pt: "291 (17.0)", et: "455 (26.6)"}, "120": {pt: "294 (17.2)", et: "456 (26.7)"} },
+            risk: { "6": {pt: "67 (3.9)", et: "256 (15.0)"}, "12": {pt: "85 (5.0)", et: "268 (15.7)"}, "24": {pt: "120 (7.0)", et: "294 (17.2)"}, "48": {pt: "180 (10.5)", et: "337 (19.7)"}, "72": {pt: "224 (13.1)", et: "371 (21.7)"}, "96": {pt: "255 (14.9)", et: "395 (23.1)"}, "120": {pt: "256 (15.0)", et: "397 (23.2)"} }
+        },
+        "36": {
+            noRisk: { "6": {pt: "84 (4.9)", et: "285 (16.7)"}, "12": {pt: "103 (6.0)", et: "299 (17.5)"}, "24": {pt: "140 (8.2)", et: "327 (19.1)"}, "48": {pt: "202 (11.8)", et: "374 (21.9)"}, "72": {pt: "248 (14.5)", et: "412 (24.1)"}, "96": {pt: "279 (16.3)", et: "436 (25.5)"}, "120": {pt: "280 (16.4)", et: "439 (25.7)"} },
+            risk: { "6": {pt: "56 (3.3)", et: "246 (14.4)"}, "12": {pt: "75 (4.4)", et: "260 (15.2)"}, "24": {pt: "109 (6.4)", et: "284 (16.6)"}, "48": {pt: "167 (9.8)", et: "327 (19.1)"}, "72": {pt: "212 (12.4)", et: "357 (20.9)"}, "96": {pt: "239 (14.0)", et: "378 (22.1)"}, "120": {pt: "241 (14.1)", et: "381 (22.3)"} }
+        },
+        "35": {
+            noRisk: { "6": {pt: "58 (3.4)", et: "266 (15.6)"}, "12": {pt: "94 (5.5)", et: "280 (16.4)"}, "24": {pt: "130 (7.6)", et: "306 (17.9)"}, "48": {pt: "191 (11.2)", et: "354 (20.7)"}, "72": {pt: "236 (13.8)", et: "391 (22.9)"}, "96": {pt: "267 (15.6)", et: "419 (24.5)"}, "120": {pt: "268 (15.7)", et: "422 (24.7)"} },
+            risk: { "6": {pt: "48 (2.8)", et: "236 (13.8)"}, "12": {pt: "67 (3.9)", et: "250 (14.6)"}, "24": {pt: "101 (5.9)", et: "275 (16.1)"}, "48": {pt: "157 (9.2)", et: "316 (18.5)"}, "72": {pt: "198 (11.6)", et: "344 (20.1)"}, "96": {pt: "224 (13.1)", et: "361 (21.1)"}, "120": {pt: "227 (13.3)", et: "364 (21.3)"} }
+        },
+        "34": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"70(4)", et:"120(7)"}, "24": {pt:"110(6.5)", et:"170(10.0)"}, "48": {pt:"170(10.0)", et:"250(14.6)"}, "72": {pt:"240(14.6)", et:"340(20.0)"}, "96": {pt:"240(14.6)", et:"340(20.0)"}, "120": {pt:"240(14.6)", et:"340(20.0)"} } },
+        "33": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"70(4)", et:"120(7)"}, "24": {pt:"100(5.9)", et:"160(9.4)"}, "48": {pt:"170(10.0)", et:"245(14.3)"}, "72": {pt:"230(13.5)", et:"330(19.3)"}, "96": {pt:"230(13.5)", et:"330(19.3)"}, "120": {pt:"230(13.5)", et:"330(19.3)"} } },
+        "32": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"70(4)", et:"120(7)"}, "24": {pt:"100(5.9)", et:"160(9.4)"}, "48": {pt:"160(9.4)", et:"240(14.0)"}, "72": {pt:"220(12.9)", et:"320(18.7)"}, "96": {pt:"220(12.9)", et:"320(18.7)"}, "120": {pt:"220(12.9)", et:"320(18.7)"} } },
+        "31": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"70(4)", et:"120(7)"}, "24": {pt:"100(5.9)", et:"155(9.1)"}, "48": {pt:"155(9.1)", et:"230(13.5)"}, "72": {pt:"210(12.3)", et:"310(18.1)"}, "96": {pt:"210(12.3)", et:"310(18.1)"}, "120": {pt:"210(12.3)", et:"310(18.1)"} } },
+        "30": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"65(3.8)", et:"115(6.7)"}, "24": {pt:"95(5.6)", et:"150(8.8)"}, "48": {pt:"145(8.5)", et:"220(12.9)"}, "72": {pt:"200(11.7)", et:"300(17.5)"}, "96": {pt:"200(11.7)", et:"300(17.5)"}, "120": {pt:"200(11.7)", et:"300(17.5)"} } },
+        "29": { noRisk: { "6": {pt:"50(3)", et:"100(6)"}, "12": {pt:"65(3.8)", et:"115(6.7)"}, "24": {pt:"90(5.3)", et:"150(8.8)"}, "48": {pt:"140(8.2)", et:"220(12.9)"}, "72": {pt:"190(11.1)", et:"290(17.0)"}, "96": {pt:"190(11.1)", et:"290(17.0)"}, "120": {pt:"190(11.1)", et:"290(17.0)"} } }
+    };
+
+    // --- TAB LOGIC ---
+    function switchTab(tabId, event) {
+        if(tabId !== 'labs') {
+            const searchInput = document.getElementById('labSearch');
+            if(searchInput.value !== "") {
+                searchInput.value = "";
+                filterLabs();
+            }
+        }
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if(event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+    }
+
+    // --- JAUNDICE LOGIC ---
+    function toggleRiskVisibility() {
+        const gest = parseInt(document.getElementById('gestation').value);
+        const riskBox = document.getElementById('riskContainer');
+        const hourSelect = document.getElementById('jaundiceHours');
+        
+        if (gest >= 35) {
+            riskBox.style.display = "block";
+            if (hourSelect.options.length < 7) {
+                 let opt = document.createElement("option");
+                 opt.value = "120"; opt.text = "≥ 120 Hours (5 Days)";
+                 hourSelect.add(opt);
+            }
+        } else {
+            riskBox.style.display = "none";
+            document.getElementById('neuroRisk').checked = false;
+        }
+    }
+    toggleRiskVisibility();
+
+    function calculateJaundice() {
+        const gest = document.getElementById('gestation').value;
+        const hour = document.getElementById('jaundiceHours').value;
+        const hasRisk = document.getElementById('neuroRisk').checked;
+        let riskKey = (gest >= 35 && hasRisk) ? 'risk' : 'noRisk';
+        
+        if (jaundiceData[gest] && jaundiceData[gest][riskKey]) {
+            let values = jaundiceData[gest][riskKey][hour];
+            if (!values && hour === "120" && gest < 35) values = jaundiceData[gest][riskKey]["96"];
+
+            if (values) {
+                document.getElementById('jaundiceResults').style.display = 'block';
+                document.getElementById('ptResult').innerHTML = `${values.pt} <span class="result-sub">µmol/L (mg/dL)</span>`;
+                document.getElementById('etResult').innerHTML = `${values.et} <span class="result-sub">µmol/L (mg/dL)</span>`;
+            } else {
+                alert("Data not available for this timepoint.");
+            }
+        } else {
+            alert("Please check configuration.");
+        }
+    }
+
+    // --- VITALS LOGIC ---
+    function calculateVitals() {
+        let val = parseFloat(document.getElementById('ageVal').value);
+        let unit = document.getElementById('ageUnit').value;
+        if (isNaN(val)) return;
+
+        let ageInMonths = 0;
+        let ageInYears = 0;
+
+        if (unit === 'days') {
+            ageInMonths = val / 30;
+            ageInYears = val / 365;
+        } else if (unit === 'months') {
+            ageInMonths = val;
+            ageInYears = val / 12;
+        } else {
+            ageInMonths = val * 12;
+            ageInYears = val;
+        }
+
+        let weight = (ageInYears < 1) ? (ageInMonths * 0.5) + 4 : ((ageInYears <= 10) ? (ageInYears + 4) * 2 : "N/A");
+        let formula = (ageInYears < 1) ? "(Age Mo x 0.5) + 4" : ((ageInYears <= 10) ? "(Age Yr + 4) x 2" : "Use BMI >10y");
+        
+        let hr = "60 - 100", rr = "12 - 20";
+        if (ageInYears < 0.1) { hr = "120 - 170"; rr = "25 - 50"; }
+        else if (ageInMonths <= 3) { hr = "115 - 160"; rr = "25 - 45"; }
+        else if (ageInMonths <= 6) { hr = "110 - 160"; rr = "20 - 40"; }
+        else if (ageInYears <= 2) { hr = "100 - 150"; rr = "20 - 30"; }
+        else if (ageInYears <= 4) { hr = "80 - 135"; rr = "20 - 30"; }
+        else if (ageInYears <= 10) { hr = "70 - 120"; rr = "15 - 25"; }
+        else { hr = "60 - 110"; rr = "12 - 24"; }
+
+        let bpSystolicLower = Math.floor(65 + (2 * ageInYears));
+
+        let growthStr = "";
+        if (ageInYears < 0.1) growthStr = "HC ~35cm | L ~50cm";
+        else if (ageInYears >= 0.9 && ageInYears <= 1.1) growthStr = "HC ~47cm | L ~75cm";
+        else if (ageInYears >= 5) growthStr = "Height gain ~5cm/yr";
+        else growthStr = "See chart";
+
+        let haemText = "";
+        if (unit === 'days' && val <= 7) haemText = "<li>Neutrophils > Lymphocytes</li><li>Hb ~15-24 g/dL</li>";
+        else if ((unit === 'days' && val > 7) || (ageInYears <= 4)) haemText = "<li>Lymphocytes > Neutrophils</li><li>Hb nadir @ 3mo</li>";
+        else haemText = "<li>Neutrophils > Lymphocytes</li>";
+
+        document.getElementById('vitalsResults').style.display = 'block';
+        document.getElementById('resWeight').innerText = (typeof weight === 'number') ? weight.toFixed(1) + " kg" : weight;
+        document.getElementById('resWeightNote').innerText = formula;
+        document.getElementById('resHR').innerText = hr;
+        document.getElementById('resRR').innerText = rr;
+        document.getElementById('resBP').innerText = "< " + bpSystolicLower;
+        document.getElementById('resGrowth').innerText = growthStr;
+        document.getElementById('haemQuickLook').innerHTML = haemText;
+    }
+
+    // --- LAB DATA ---
+    const labData = [
+        // HAEMATOLOGY
+        { cat: "Haem", test: "Hemoglobin (Hb)", age: "Cord Blood", val: "13.7 - 20.1", unit: "g/dL" },
+        { cat: "Haem", test: "Hemoglobin (Hb)", age: "2 weeks", val: "13.0 - 20.0", unit: "g/dL" },
+        { cat: "Haem", test: "Hemoglobin (Hb)", age: "3 months", val: "9.5 - 14.5", unit: "g/dL" },
+        { cat: "Haem", test: "Hemoglobin (Hb)", age: "6 mths - 6 yrs", val: "10.5 - 14.0", unit: "g/dL" },
+        { cat: "Haem", test: "Hemoglobin (Hb)", age: "7 - 12 years", val: "11.0 - 16.0", unit: "g/dL" },
+        { cat: "Haem", test: "TWBC", age: "Cord Blood", val: "9 - 30", unit: "x10⁹/L" },
+        { cat: "Haem", test: "TWBC", age: "2 weeks", val: "5 - 21", unit: "x10⁹/L" },
+        { cat: "Haem", test: "TWBC", age: "3 months", val: "6 - 18", unit: "x10⁹/L" },
+        { cat: "Haem", test: "TWBC", age: "6 mths - 6 yrs", val: "6 - 15", unit: "x10⁹/L" },
+        
+        // CHEMISTRY
+        { cat: "Chem", test: "Albumin", age: "Premature 1 day", val: "1.8 - 3.0", unit: "g/dL" },
+        { cat: "Chem", test: "Albumin", age: "Full-term 1-12 mo", val: "2.5 - 3.9", unit: "g/dL" },
+        { cat: "Chem", test: "Albumin", age: "1 - 3 years", val: "3.4 - 5.2", unit: "g/dL" },
+        { cat: "Chem", test: "Ammonia", age: "Newborn-Child", val: "29 - 150", unit: "mcg/dL" },
+        { cat: "Chem", test: "ALT", age: "< 7 days", val: "6 - 40", unit: "units/L" },
+        { cat: "Chem", test: "ALT", age: "1 mo - 19 yrs", val: "5 - 55", unit: "units/L" },
+        { cat: "Chem", test: "AST", age: "Newborn (Male)", val: "30 - 150", unit: "units/L" },
+        { cat: "Chem", test: "AST", age: "1 - 3 years", val: "20 - 60", unit: "units/L" },
+        { cat: "Chem", test: "Bilirubin (Total)", age: "Newborn < 1 day", val: "< 6.0", unit: "mg/dL" }, 
+        { cat: "Chem", test: "Bilirubin (Total)", age: "1 mo - 19 yrs", val: "< 1.5", unit: "mg/dL" },
+        { cat: "Chem", test: "BUN", age: "All ages", val: "2 - 20", unit: "mg/dL" },
+        { cat: "Chem", test: "Calcium (Total)", age: "Child", val: "8.8 - 10.8", unit: "mg/dL" },
+        { cat: "Chem", test: "Creatinine (SCr)", age: "Newborn", val: "0.3 - 1.0", unit: "mg/dL" },
+        { cat: "Chem", test: "Creatinine (SCr)", age: "Child", val: "0.3 - 0.7", unit: "mg/dL" },
+        { cat: "Chem", test: "Creatinine (SCr)", age: "Adolescent", val: "0.5 - 1.0", unit: "mg/dL" },
+        { cat: "Chem", test: "Glucose", age: "Newborn 1 day", val: "40 - 60", unit: "mg/dL" },
+        { cat: "Chem", test: "Glucose", age: "Child", val: "60 - 100", unit: "mg/dL" },
+        { cat: "Chem", test: "Potassium (K)", age: "Newborn", val: "3.7 - 7.2", unit: "mEq/L" },
+        { cat: "Chem", test: "Potassium (K)", age: "1 - 16 years", val: "3.5 - 5.1", unit: "mEq/L" },
+        { cat: "Chem", test: "Sodium (Na)", age: "All ages", val: "130 - 147", unit: "mEq/L" },
+        { cat: "Chem", test: "CRP", age: "All ages", val: "< 0.8", unit: "mg/dL" },
+        
+        // GAS
+        { cat: "Gas", test: "pH (Arterial)", age: "All ages", val: "7.35 - 7.45", unit: "" },
+        { cat: "Gas", test: "pCO2 (Arterial)", age: "All ages", val: "32 - 48", unit: "mmHg" },
+        { cat: "Gas", test: "HCO3", age: "All ages", val: "19 - 28", unit: "mEq/L" },
+
+        // ENDOCRINE
+        { cat: "Endo", test: "TSH", age: "Cord Blood", val: "2.3 - 13.2", unit: "mIU/L" },
+        { cat: "Endo", test: "TSH", age: "Newborn (1-4 Days)", val: "1.0 - 39.0", unit: "mIU/L (Surge)" },
+        { cat: "Endo", test: "TSH", age: "2 - 20 Weeks", val: "1.7 - 9.1", unit: "mIU/L" },
+        { cat: "Endo", test: "TSH", age: "5 Months - 20 Years", val: "0.7 - 6.4", unit: "mIU/L" },
+        { cat: "Endo", test: "Free T4 (FT4)", age: "Cord Blood", val: "11 - 28", unit: "pmol/L" },
+        { cat: "Endo", test: "Free T4 (FT4)", age: "Newborn (1-4 Days)", val: "12 - 30", unit: "pmol/L" },
+        { cat: "Endo", test: "Free T4 (FT4)", age: "2 - 20 Weeks", val: "10 - 26", unit: "pmol/L" },
+        { cat: "Endo", test: "Free T4 (FT4)", age: "Child - Adult", val: "10 - 20", unit: "pmol/L" },
+    ];
+
+    function initLabs() {
+        // Sort: Category first, then Test Name
+        labData.sort((a, b) => {
+            if (a.cat !== b.cat) return a.cat.localeCompare(b.cat);
+            return a.test.localeCompare(b.test);
+        });
+
+        // Fixed: Target the TABLE itself, not a separate TBODY container
+        const table = document.getElementById('labTable');
+        
+        // Clear any existing TBODYs (keep THEAD)
+        const oldTbodies = table.querySelectorAll('tbody');
+        oldTbodies.forEach(tb => tb.remove());
+
+        let currentTest = null;
+        let tbody = null;
+
+        labData.forEach(item => {
+            // New Test Group detected
+            if (item.test !== currentTest) {
+                currentTest = item.test;
+                
+                // Create a TBODY for this group and append it DIRECTLY to the TABLE
+                tbody = document.createElement('tbody');
+                tbody.className = 'test-group';
+                tbody.setAttribute('data-test', item.test.toLowerCase());
+                tbody.setAttribute('data-cat', item.cat.toLowerCase());
+                
+                // Determine Badge Style
+                let badgeClass = '';
+                if(item.cat === 'Haem') badgeClass = 'badge-blood';
+                else if(item.cat === 'Gas') badgeClass = 'badge-gas';
+                else if(item.cat === 'Endo') badgeClass = 'badge-endo';
+                else badgeClass = 'badge-chem';
+                
+                // Add Group Header Row
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'group-header';
+                headerRow.innerHTML = `
+                    <td colspan="3">
+                        <div class="group-title">
+                            ${item.test}
+                            <span class="badge ${badgeClass}">${item.cat}</span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(headerRow);
+                table.appendChild(tbody);
+            }
+
+            // Add Data Row to current Tbody
+            const tr = document.createElement('tr');
+            tr.className = 'data-row';
+            tr.innerHTML = `
+                <td>${item.age}</td>
+                <td>${item.val}</td>
+                <td>${item.unit}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterLabs() {
+        const input = document.getElementById('labSearch');
+        const filter = input.value.toLowerCase();
+        const groups = document.querySelectorAll('.test-group');
+
+        groups.forEach(group => {
+            const testName = group.getAttribute('data-test');
+            const catName = group.getAttribute('data-cat');
+            const dataRows = group.querySelectorAll('.data-row');
+            
+            // Check if Search matches the Group Header (Test Name or Category)
+            const headerMatch = testName.includes(filter) || catName.includes(filter);
+            
+            let visibleRowsCount = 0;
+
+            dataRows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                const rowMatch = rowText.includes(filter);
+
+                // If Header matches, show all rows. 
+                // If Row matches, show row.
+                if (headerMatch || rowMatch) {
+                    row.style.display = "";
+                    visibleRowsCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Show Group if any rows are visible
+            if (visibleRowsCount > 0) {
+                group.style.display = "";
+            } else {
+                group.style.display = "none";
+            }
+        });
+    }
+
+    initLabs();
+</script>
+
+</body>
+</html>
