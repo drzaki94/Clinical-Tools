@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCD Primary Care Toolkit (Malaysia/Intl)</title>
+    <style>
+        :root {
+            --primary: #0056b3; /* Medical Blue */
+            --primary-light: #e6f0fa;
+            --accent: #00a8cc;
+            --text: #333;
+            --border: #ddd;
+            --white: #fff;
+            --success: #d4edda;
+            --success-text: #155724;
+            --warning: #fff3cd;
+            --warning-text: #856404;
+            --danger: #f8d7da;
+            --danger-text: #721c24;
+            --ckm-purple: #6f42c1; /* CKM Theme */
+            --ckm-light: #f3e5f5;
+        }
+
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; color: var(--text); margin: 0; padding: 0; }
+        
+        /* Layout */
+        .wrapper { max-width: 1000px; margin: 20px auto; background: var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        
+        /* Header */
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+
+        /* Navigation Tabs */
+        .tabs { display: flex; flex-wrap: wrap; background: #eee; border-bottom: 1px solid var(--border); }
+        .tab-btn { 
+            flex: 1; 
+            padding: 15px 10px; 
+            border: none; 
+            background: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: #666;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 120px;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn:hover { background: #e0e0e0; color: var(--primary); }
+        .tab-btn.active { background: var(--white); color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+        /* Content Sections */
+        .tab-content { display: none; padding: 25px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Form Elements */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        
+        @media (max-width: 600px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .tabs { overflow-x: auto; flex-wrap: nowrap; }
+        }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 500; margin-bottom: 5px; font-size: 0.9rem; }
+        input[type="number"], select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border); 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
+        
+        .btn-calc {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-calc:hover { background: #004494; }
+
+        /* Results Boxes */
+        .result-box { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border-radius: 6px; 
+            background: var(--primary-light);
+            border-left: 5px solid var(--primary);
+        }
+        .result-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: var(--primary); }
+        
+        /* Specific Styles for Guidelines */
+        .alert-box { padding: 10px; border-radius: 4px; margin-bottom: 10px; font-size: 0.9rem; }
+        .alert-green { background: var(--success); color: var(--success-text); }
+        .alert-yellow { background: var(--warning); color: var(--warning-text); }
+        .alert-red { background: var(--danger); color: var(--danger-text); }
+        .alert-purple { background: var(--ckm-light); color: var(--ckm-purple); border-left: 5px solid var(--ckm-purple); }
+
+        .guideline-ref { font-size: 0.75rem; color: #888; text-align: right; margin-top: 5px; font-style: italic; }
+
+        /* Checkbox lists */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
+        
+        /* Toggle Switch for CVD */
+        .toggle-container { display: flex; background: #eee; border-radius: 20px; padding: 2px; width: fit-content; margin-bottom: 15px; }
+        .toggle-btn { padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer; background: transparent; color: #666; font-size: 0.9rem; }
+        .toggle-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <h1>NCD Clinical Toolkit</h1>
+        <p>Evidence-Based | CPG Malaysia, ADA, KDIGO, ESC, AHA CKM</p>
+    </header>
+
+    <!-- Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('anthropometry')">1. BMI & Waist</button>
+        <button class="tab-btn" onclick="openTab('renal')">2. eGFR & CKD</button>
+        <button class="tab-btn" onclick="openTab('cvdrisk')">3. CVD Risk & CKM</button>
+        <button class="tab-btn" onclick="openTab('targets')">4. Targets</button>
+        <button class="tab-btn" onclick="openTab('management')">5. Integrated NCD Plan</button>
+    </div>
+
+    <!-- TAB 1: Anthropometry -->
+    <div id="anthropometry" class="tab-content active">
+        <h2 class="result-title">Anthropometry Calculator (Asian Cutoffs)</h2>
+        <div class="grid-3">
+            <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" id="bmi_weight" placeholder="e.g. 75">
+            </div>
+            <div class="form-group">
+                <label>Height (cm)</label>
+                <input type="number" id="bmi_height" placeholder="e.g. 170">
+            </div>
+            <div class="form-group">
+                <label>Waist Circ (cm)</label>
+                <input type="number" id="bmi_waist" placeholder="e.g. 95">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Gender</label>
+            <select id="bmi_gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+        <button class="btn-calc" onclick="calcBMI()">Calculate BMI & Risk</button>
+        
+        <div id="res_bmi" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 2: Renal / CKD -->
+    <div id="renal" class="tab-content">
+        <h2 class="result-title">CKD-EPI 2021 Calculator (Race-Free)</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Serum Creatinine (µmol/L)</label>
+                <input type="number" id="ckd_creat" placeholder="e.g. 110">
+            </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="ckd_age" value="55">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="ckd_gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Albuminuria Status</label>
+                <select id="ckd_acr">
+                    <option value="a1">A1: Normal/Mild (&lt;3 mg/mmol)</option>
+                    <option value="a2">A2: Moderate (3-30 mg/mmol)</option>
+                    <option value="a3">A3: Severe (&gt;30 mg/mmol)</option>
+                    <option value="dipstick">Dipstick 1+ or higher (if ACR unavail)</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcCKD()">Calculate eGFR & Stage</button>
+
+        <div id="res_ckd" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 3: CVD Risk & CKM -->
+    <div id="cvdrisk" class="tab-content">
+        <h2 class="result-title">CVD Risk Assessment</h2>
+        
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btn_framingham" onclick="toggleCVD('framingham')">Framingham (2008)</button>
+            <button class="toggle-btn" id="btn_ckm" onclick="toggleCVD('ckm')">AHA CKM / PREVENT Model</button>
+        </div>
+
+        <!-- Framingham Inputs -->
+        <div id="section_framingham">
+            <div class="alert-box alert-yellow">
+                <strong>Target:</strong> General CVD Risk (10-Year). <br>Use for: Age 30-74, No CVD history.
+            </div>
+            <!-- Reusing inputs for simplicity where overlaps exist -->
+            <div class="grid-2">
+                <div class="form-group"><label>Age</label><input type="number" id="cvd_age" value="50"></div>
+                <div class="form-group"><label>Gender</label><select id="cvd_gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+                <div class="form-group"><label>Total Cholesterol (mmol/L)</label><input type="number" id="cvd_tc" value="5.5"></div>
+                <div class="form-group"><label>HDL Cholesterol (mmol/L)</label><input type="number" id="cvd_hdl" value="1.2"></div>
+                <div class="form-group"><label>Systolic BP (mmHg)</label><input type="number" id="cvd_sbp" value="135"></div>
+                <div class="form-group"><label>On HTN Meds?</label><select id="cvd_treated"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                <div class="form-group"><label>Smoker?</label><select id="cvd_smoker"><option value="0">No</option><option value="1">Yes</option></select></div>
+            </div>
+            <button class="btn-calc" onclick="calcFramingham()">Calculate Framingham Score</button>
+        </div>
+
+        <!-- CKM / PREVENT Inputs -->
+        <div id="section_ckm" style="display:none;">
+            <div class="alert-box alert-purple">
+                <strong>AHA CKM Staging:</strong> Cardiovascular-Kidney-Metabolic Model.<br>
+                Assesses Stage 0 (No risk) to Stage 4 (Clinical CVD).<br>
+                <em>Note: Full PREVENT numeric % requires complex coefficients; this tool provides the Clinical Stage and estimated risk category.</em>
+            </div>
+            <div class="grid-2">
+                <div class="form-group"><label>BMI Category</label><select id="ckm_bmi"><option value="normal">Normal</option><option value="overweight">Overweight/Obese (>23 Asian)</option></select></div>
+                <div class="form-group"><label>Metabolic Risk Factors</label>
+                    <div style="font-size:0.85rem; color:#666;">Check if ANY present: HTN, High Trig, Hyperglycemia</div>
+                    <select id="ckm_metabolic"><option value="no">None</option><option value="yes">Yes (HTN/MetS/Pre-DM)</option></select>
+                </div>
+                <div class="form-group"><label>Kidney Disease</label><select id="ckm_kidney"><option value="no">None</option><option value="yes">CKD (eGFR<60 or High ACR)</option></select></div>
+                <div class="form-group"><label>Diabetes</label><select id="ckm_dm"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                <div class="form-group"><label>Clinical CVD History</label><select id="ckm_cvd"><option value="no">No</option><option value="yes">Yes (Stroke/MI/HF)</option></select></div>
+            </div>
+            <button class="btn-calc" style="background:var(--ckm-purple)" onclick="calcCKM()">Determine CKM Stage</button>
+        </div>
+
+        <div id="res_cvd" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 4: Personalized Targets -->
+    <div id="targets" class="tab-content">
+        <h2 class="result-title">Personalized Target Setter</h2>
+        <p style="font-size:0.9rem">Determines BP and HbA1c targets based on frailty and comorbidities.</p>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Patient Age</label>
+                <input type="number" id="tgt_age" value="60">
+            </div>
+            <div class="form-group">
+                <label>Functional Status / Frailty</label>
+                <select id="tgt_frailty">
+                    <option value="fit">Good Health (Independent, no cognitive impairment)</option>
+                    <option value="moderate">Intermediate (Multiple illnesses, mild impairment)</option>
+                    <option value="severe">Poor Health (Dependent, dementia, end-stage)</option>
+                </select>
+            </div>
+        </div>
+
+        <label>Comorbidities (Tick relevant):</label>
+        <div class="checkbox-grid">
+            <label class="checkbox-item"><input type="checkbox" id="tgt_dm"> Diabetes</label>
+            <label class="checkbox-item"><input type="checkbox" id="tgt_ckd"> CKD</label>
+            <label class="checkbox-item"><input type="checkbox" id="tgt_stroke"> Previous Stroke/TIA</label>
+            <label class="checkbox-item"><input type="checkbox" id="tgt_cad"> Coronary Artery Disease</label>
+        </div>
+        <br>
+        <button class="btn-calc" onclick="calcTargets()">Determine Clinical Targets</button>
+        <div id="res_targets" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 5: MASTER PLAN -->
+    <div id="management" class="tab-content">
+        <h2 class="result-title">Integrated NCD Plan (CKM-Based)</h2>
+        <p style="font-size:0.9rem">Holistic plan integrating CKM Model, ADA, KDIGO, and CPG guidelines.</p>
+        
+        <div style="background: #f0f7ff; padding: 15px; border-radius: 6px; border: 1px solid #cce5ff;">
+            <h3 style="margin-top:0; font-size:1rem;">1. Select Active Diagnoses</h3>
+            <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" id="plan_htn"> Hypertension</label>
+                <label class="checkbox-item"><input type="checkbox" id="plan_dm"> T2 Diabetes</label>
+                <label class="checkbox-item"><input type="checkbox" id="plan_ckd"> CKD</label>
+                <label class="checkbox-item"><input type="checkbox" id="plan_obe"> Obesity</label>
+                <label class="checkbox-item" style="color:#d32f2f; font-weight:bold;"><input type="checkbox" id="plan_cvd"> Established CVD (IHD/Stroke)</label>
+                <label class="checkbox-item" style="color:#d32f2f; font-weight:bold;"><input type="checkbox" id="plan_hf"> Heart Failure</label>
+            </div>
+
+            <h3 style="margin-top:15px; font-size:1rem;">2. Key Clinical Data</h3>
+            <div class="grid-3">
+                <div class="form-group"><label>Age</label><input type="number" id="plan_age" placeholder="Yrs"></div>
+                <div class="form-group"><label>eGFR</label><input type="number" id="plan_egfr" placeholder="ml/min"></div>
+                <div class="form-group">
+                    <label>Urine ACR (Optional)</label>
+                    <select id="plan_acr">
+                        <option value="">Unknown / Not Done</option>
+                        <option value="normal">Normal</option>
+                        <option value="high">Elevated (>3 mg/mmol)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>BMI</label><input type="number" id="plan_bmi" placeholder="kg/m2"></div>
+                <div class="form-group"><label>LDL-C</label><input type="number" id="plan_ldl" placeholder="mmol/L"></div>
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="generateMasterPlan()">Generate Integrated Plan</button>
+        
+        <div id="res_plan" class="result-box" style="display:none; background: #fff; border: 1px solid #ddd; border-left: 5px solid var(--primary);">
+            <div id="plan_content"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Navigation Logic ---
+    function openTab(tabName) {
+        var i;
+        var x = document.getElementsByClassName("tab-content");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+            x[i].classList.remove("active");
+        }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        
+        var btns = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < btns.length; i++) {
+            btns[i].classList.remove("active");
+        }
+        event.currentTarget.classList.add("active");
+    }
+
+    function toggleCVD(type) {
+        document.getElementById('section_framingham').style.display = type === 'framingham' ? 'block' : 'none';
+        document.getElementById('section_ckm').style.display = type === 'ckm' ? 'block' : 'none';
+        
+        document.getElementById('btn_framingham').className = type === 'framingham' ? 'toggle-btn active' : 'toggle-btn';
+        document.getElementById('btn_ckm').className = type === 'ckm' ? 'toggle-btn active' : 'toggle-btn';
+        
+        document.getElementById('res_cvd').style.display = 'none'; // hide results on toggle
+    }
+
+    // --- TAB 1: BMI Calculator (Asian CPG) ---
+    function calcBMI() {
+        let w = parseFloat(document.getElementById('bmi_weight').value);
+        let h = parseFloat(document.getElementById('bmi_height').value);
+        let waist = parseFloat(document.getElementById('bmi_waist').value);
+        let gender = document.getElementById('bmi_gender').value;
+        
+        if(!w || !h) { alert("Please enter weight and height."); return; }
+        
+        let bmi = w / ((h/100) * (h/100));
+        let category = "";
+        let colorClass = "";
+        let isObese = false;
+
+        // CPG Malaysia / WHO Asia Pacific Cutoffs
+        if (bmi < 18.5) { category = "Underweight"; colorClass = "alert-yellow"; }
+        else if (bmi < 23) { category = "Normal Range"; colorClass = "alert-green"; }
+        else if (bmi < 27.5) { category = "Overweight (Pre-obese)"; colorClass = "alert-yellow"; isObese = true; }
+        else { category = "Obese"; colorClass = "alert-red"; isObese = true; }
+
+        let waistMsg = "";
+        if (waist) {
+            let limit = (gender === 'male') ? 90 : 80;
+            if (waist > limit) {
+                waistMsg = `<br><strong>Central Obesity:</strong> Yes (> ${limit}cm). Increased metabolic risk.`;
+                isObese = true; 
+            } else {
+                waistMsg = `<br><strong>Central Obesity:</strong> No.`;
+            }
+        }
+
+        let html = `
+            <div class="alert-box ${colorClass}">
+                <strong>BMI: ${bmi.toFixed(1)} kg/m²</strong> - ${category}
+            </div>
+            ${waistMsg}
+            <div class="guideline-ref">Ref: CPG Management of Obesity (Malaysia) / WHO Asia Pacific</div>
+        `;
+        
+        document.getElementById('res_bmi').innerHTML = html;
+        document.getElementById('res_bmi').style.display = "block";
+        
+        // Auto-fill master plan inputs
+        document.getElementById('plan_bmi').value = bmi.toFixed(1);
+        if(isObese) {
+             document.getElementById('plan_obe').checked = true;
+             document.getElementById('ckm_bmi').value = 'overweight';
+        }
+    }
+
+    // --- TAB 2: eGFR (CKD-EPI 2021) ---
+    function calcCKD() {
+        let creat = parseFloat(document.getElementById('ckd_creat').value);
+        let age = parseFloat(document.getElementById('ckd_age').value);
+        let gender = document.getElementById('ckd_gender').value;
+        let acr = document.getElementById('ckd_acr').value;
+
+        if (!creat || !age) { alert("Please enter Creatinine and Age"); return; }
+
+        // CKD-EPI 2021 (Race-Free)
+        // Constants
+        let kappa = gender === 'female' ? 0.7 : 0.9;
+        let alpha = gender === 'female' ? -0.241 : -0.302;
+        let factor = 142;
+        let genderFactor = gender === 'female' ? 1.012 : 1.0;
+        
+        let scr = creat / 88.4; // Convert umol/L to mg/dL
+        
+        let minPart = Math.min(scr/kappa, 1);
+        let maxPart = Math.max(scr/kappa, 1);
+        
+        let egfr = factor * Math.pow(minPart, alpha) * Math.pow(maxPart, -1.200) * Math.pow(0.9938, age) * genderFactor;
+        
+        egfr = Math.round(egfr);
+
+        // Staging
+        let gStage = "";
+        if (egfr >= 90) gStage = "G1 (Normal)";
+        else if (egfr >= 60) gStage = "G2 (Mildly Decreased)";
+        else if (egfr >= 45) gStage = "G3a (Mild-Mod)";
+        else if (egfr >= 30) gStage = "G3b (Mod-Severe)";
+        else if (egfr >= 15) gStage = "G4 (Severe)";
+        else gStage = "G5 (Kidney Failure)";
+
+        // Risk Heatmap Logic (KDIGO)
+        let risk = "Low Risk";
+        let color = "alert-green";
+        let freq = "Yearly";
+        
+        let isHighACR = (acr === 'a2' || acr === 'dipstick');
+        let isVeryHighACR = (acr === 'a3');
+
+        if (egfr < 30 || (egfr < 45 && isHighACR) || (egfr < 60 && isVeryHighACR)) {
+            risk = "Very High Risk (Red)"; color = "alert-red"; freq = "Refer Nephrology / Monitor 3-monthly";
+        } else if ((egfr < 45) || (egfr < 60 && isHighACR) || (isVeryHighACR)) {
+            risk = "High Risk (Orange)"; color = "alert-yellow"; freq = "Monitor 4-6 monthly";
+        } else if ((egfr < 60) || isHighACR) {
+            risk = "Moderate Risk (Yellow)"; color = "alert-yellow"; freq = "Monitor 6-12 monthly";
+        }
+
+        let html = `
+            <div class="alert-box ${color}">
+                <strong>eGFR: ${egfr} ml/min/1.73m²</strong><br>
+                Stage: ${gStage} | Albuminuria: ${acr.toUpperCase()}
+            </div>
+            <strong>KDIGO Prognosis:</strong> ${risk}<br>
+            <strong>Action:</strong> ${freq}
+            <div class="guideline-ref">Ref: CKD-EPI 2021 (Creatinine) Formula</div>
+        `;
+
+        document.getElementById('res_ckd').innerHTML = html;
+        document.getElementById('res_ckd').style.display = "block";
+        
+        // Auto-fill master plan
+        document.getElementById('plan_egfr').value = egfr;
+        document.getElementById('plan_age').value = age;
+        if(isHighACR || isVeryHighACR) {
+            document.getElementById('plan_acr').value = "high";
+            document.getElementById('ckm_kidney').value = "yes";
+        }
+        if(egfr < 60) {
+            document.getElementById('plan_ckd').checked = true;
+            document.getElementById('ckm_kidney').value = "yes";
+        }
+    }
+
+    // --- TAB 3: CVD Risk (Framingham & CKM) ---
+    function calcFramingham() {
+        let age = parseFloat(document.getElementById('cvd_age').value);
+        let gender = document.getElementById('cvd_gender').value;
+        let tc = parseFloat(document.getElementById('cvd_tc').value);
+        let hdl = parseFloat(document.getElementById('cvd_hdl').value);
+        let sbp = parseFloat(document.getElementById('cvd_sbp').value);
+        let smoker = document.getElementById('cvd_smoker').value;
+        let treated = document.getElementById('cvd_treated').value;
+
+        if(!age || !tc || !hdl || !sbp) { alert("Please fill all fields"); return; }
+
+        // Simplified 2008 Logic (Proxy for Toolkit)
+        let points = 0;
+        
+        // Age (Male)
+        if(gender === 'male') {
+            if(age<35) points-=9; else if(age<40) points-=4; else if(age<45) points=0; else if(age<50) points=3; else if(age<55) points=6; else if(age<60) points=8; else if(age<65) points=10; else if(age<70) points=11; else if(age<75) points=12; else points=13;
+        } else {
+             if(age<35) points-=7; else if(age<40) points-=3; else if(age<45) points=0; else if(age<50) points=3; else if(age<55) points=6; else if(age<60) points=8; else if(age<65) points=10; else if(age<70) points=12; else if(age<75) points=14; else points=16;
+        }
+
+        // Cholesterol
+        if(tc>7.2) points+= (gender==='male'?11:13); else if(tc>6.2) points+= (gender==='male'?9:11); else if(tc>5.2) points+= (gender==='male'?4:4);
+        
+        // HDL
+        if(hdl<0.9) points+=2; else if(hdl<1.2) points+=1; else if(hdl>=1.6) points-=1;
+
+        // SBP
+        if(sbp>160) points+= (treated==='yes'?3:2); else if(sbp>140) points+= (treated==='yes'?2:1); else if(sbp>130) points+=1;
+        
+        // Smoker
+        if(smoker==='1') points+= (gender==='male'?8:9);
+        if(document.getElementById('tgt_dm').checked) points+= (gender==='male'?3:4); // Rough DM adjust
+
+        let risk = 0;
+        if(points <= -3) risk = "<1"; else if(points <= 0) risk = "1"; else if(points <= 5) risk = "2-4"; else if(points <= 10) risk = "6-8"; else if(points <= 15) risk = "10-15"; else if(points <= 20) risk = "20-25"; else risk = ">30";
+
+        let cat = "";
+        let color = "";
+        let numRisk = parseInt(risk.replace(/[^\d]/g, ''));
+        if(numRisk < 10) { cat = "Low Risk"; color = "alert-green"; }
+        else if(numRisk < 20) { cat = "Intermediate Risk"; color = "alert-yellow"; }
+        else { cat = "High Risk"; color = "alert-red"; }
+
+        let html = `
+            <div class="alert-box ${color}">
+                <strong>Framingham Score (2008): ${risk}%</strong><br>
+                Category: ${cat}
+            </div>
+            <div class="guideline-ref">Ref: Framingham General CVD Risk Score (2008)</div>
+        `;
+        document.getElementById('res_cvd').innerHTML = html;
+        document.getElementById('res_cvd').style.display = "block";
+    }
+
+    function calcCKM() {
+        let bmi = document.getElementById('ckm_bmi').value;
+        let metabolic = document.getElementById('ckm_metabolic').value;
+        let kidney = document.getElementById('ckm_kidney').value;
+        let dm = document.getElementById('ckm_dm').value;
+        let cvd = document.getElementById('ckm_cvd').value;
+
+        let stage = "";
+        let desc = "";
+        let color = "";
+        
+        // CKM Staging Logic (AHA 2023)
+        if(cvd === 'yes') {
+            stage = "Stage 4 (Clinical CVD)";
+            desc = "Established cardiovascular disease.";
+            color = "alert-red";
+        } else if (kidney === 'yes' || dm === 'yes') {
+            // Note: PREVENT High Risk also triggers Stage 3, simplified here to key drivers
+            stage = "Stage 3 (Subclinical / High Risk)";
+            desc = "Metabolic risk with end-organ impact or very high predicted risk.";
+            color = "alert-red";
+        } else if (metabolic === 'yes') {
+            stage = "Stage 2 (Metabolic Risk)";
+            desc = "HTN, High Triglycerides, or Metabolic Syndrome present.";
+            color = "alert-yellow";
+        } else if (bmi === 'overweight') {
+            stage = "Stage 1 (Excess Adiposity)";
+            desc = "Excess weight/waist without other metabolic abnormalities.";
+            color = "alert-yellow";
+        } else {
+            stage = "Stage 0 (No Risk)";
+            desc = "Normal weight, normal BP/lipids/glucose.";
+            color = "alert-green";
+        }
+
+        let html = `
+            <div class="alert-box ${color}">
+                <strong>${stage}</strong><br>
+                ${desc}
+            </div>
+            <strong>Management Focus:</strong>
+            <ul>
+                ${stage.includes('0') ? '<li>Maintain healthy lifestyle. Screen every 3-5 years.</li>' : ''}
+                ${stage.includes('1') ? '<li>Weight loss 5%. Lifestyle modification.</li>' : ''}
+                ${stage.includes('2') ? '<li>Treat BP/Lipids to target. Screen for Kidney/Liver disease.</li>' : ''}
+                ${stage.includes('3') ? '<li><strong>Key:</strong> SGLT2i / GLP-1 RA consideration significantly increases. Intensify statin/BP control.</li>' : ''}
+                ${stage.includes('4') ? '<li>Secondary prevention. Guideline Directed Medical Therapy (GDMT).</li>' : ''}
+            </ul>
+            <div class="guideline-ref">Ref: AHA PREVENT / CKM Model 2023</div>
+        `;
+        document.getElementById('res_cvd').innerHTML = html;
+        document.getElementById('res_cvd').style.display = "block";
+    }
+
+    // --- TAB 4: Targets ---
+    function calcTargets() {
+        let age = parseFloat(document.getElementById('tgt_age').value);
+        let frailty = document.getElementById('tgt_frailty').value;
+        let hasDM = document.getElementById('tgt_dm').checked;
+        let hasCKD = document.getElementById('tgt_ckd').checked;
+        let hasStroke = document.getElementById('tgt_stroke').checked;
+        let hasCAD = document.getElementById('tgt_cad').checked;
+
+        // BP Targets (CPG Malaysia / ESC)
+        let bpTgt = "";
+        let bpReason = "";
+
+        if (age >= 80 || frailty === 'severe') {
+            bpTgt = "< 150/90 mmHg";
+            bpReason = "Relaxed due to age/frailty to prevent falls/AKI.";
+        } else if (age >= 65 || frailty === 'moderate') {
+            bpTgt = "130-139 / <80 mmHg";
+            bpReason = "Standard elderly target.";
+        } else {
+            if (hasCKD || hasStroke || hasCAD || hasDM) {
+                bpTgt = "120-130 / <80 mmHg";
+                bpReason = "High risk group (Intensive) if tolerated.";
+            } else {
+                bpTgt = "< 130/80 mmHg";
+                bpReason = "Standard target.";
+            }
+        }
+
+        // HbA1c Targets (ADA)
+        let a1cTgt = "N/A (Not Diabetic)";
+        if(hasDM) {
+            if(frailty === 'fit' && age < 65 && !hasCAD) {
+                a1cTgt = "< 6.5%";
+                bpReason += "<br>A1c strict: Young, healthy, short duration DM.";
+            } else if (frailty === 'severe' || (age > 75 && hasCAD)) {
+                a1cTgt = "< 8.0 - 8.5%";
+                bpReason += "<br>A1c relaxed: Avoid hypoglycemia, limited life expectancy.";
+            } else {
+                a1cTgt = "< 7.0%";
+                bpReason += "<br>A1c standard: Most non-pregnant adults.";
+            }
+        }
+
+        // LDL Targets
+        let ldlTgt = "< 3.0 mmol/L (Low Risk)";
+        if(hasCAD || hasStroke || (hasCKD && age > 50) || (hasDM && age > 40)) {
+            ldlTgt = "< 1.4 - 1.8 mmol/L";
+        } else if (hasDM || hasCKD) {
+            ldlTgt = "< 2.6 mmol/L";
+        }
+
+        let html = `
+            <table class="table">
+                <tr><th>Parameter</th><th>Target</th></tr>
+                <tr><td><strong>Blood Pressure</strong></td><td style="color:var(--primary); font-weight:bold;">${bpTgt}</td></tr>
+                <tr><td><strong>HbA1c</strong></td><td style="color:var(--primary); font-weight:bold;">${a1cTgt}</td></tr>
+                <tr><td><strong>LDL Cholesterol</strong></td><td style="color:var(--primary); font-weight:bold;">${ldlTgt}</td></tr>
+            </table>
+            <p style="font-size:0.9rem; color:#666;"><em>Rationale: ${bpReason}</em></p>
+        `;
+        document.getElementById('res_targets').innerHTML = html;
+        document.getElementById('res_targets').style.display = "block";
+    }
+
+    // --- TAB 5: Integrated Plan ---
+    function generateMasterPlan() {
+        // Collect Inputs
+        let htn = document.getElementById('plan_htn').checked;
+        let dm = document.getElementById('plan_dm').checked;
+        let ckd = document.getElementById('plan_ckd').checked;
+        let obe = document.getElementById('plan_obe').checked;
+        let cvd = document.getElementById('plan_cvd').checked;
+        let hf = document.getElementById('plan_hf').checked;
+        
+        let egfr = parseFloat(document.getElementById('plan_egfr').value);
+        let acr = document.getElementById('plan_acr').value;
+        let bmi = parseFloat(document.getElementById('plan_bmi').value);
+        let ldl = parseFloat(document.getElementById('plan_ldl').value);
+
+        // Determine CKM Stage for Header
+        let ckmStage = "Stage 0";
+        if(cvd || hf) ckmStage = "Stage 4 (Clinical CVD)";
+        else if(ckd || dm || (egfr && egfr<60) || acr==='high') ckmStage = "Stage 3 (Subclinical/High Risk)";
+        else if(htn || (bmi && bmi>23) || obe) ckmStage = "Stage 2 (Metabolic Risk)";
+        else if(bmi && bmi>23) ckmStage = "Stage 1 (Excess Adiposity)";
+
+        let planHtml = `<div class="alert-box alert-purple" style="margin-top:0"><strong>AHA CKM Status: ${ckmStage}</strong></div>`;
+
+        // 1. T2DM Management (ADA Standards)
+        if(dm) {
+            planHtml += `<h4>🍬 Diabetes Management</h4><ul>`;
+            planHtml += `<li><strong>Foundation:</strong> Metformin (Adjust if eGFR <45, Stop if <30).</li>`;
+            
+            // CKM Driven Logic
+            let sglIndication = [];
+            if(ckd || (egfr && egfr < 60) || acr === 'high') sglIndication.push("CKD Protection");
+            if(hf) sglIndication.push("Heart Failure");
+            if(cvd) sglIndication.push("CVD Risk Reduction");
+
+            if(sglIndication.length > 0) {
+                planHtml += `<li style="color:var(--danger-text); background:#fce8e6; padding:2px;"><strong>Compelling Indication (CKM Stage 3/4):</strong> Start SGLT2i (e.g., Empa/Dapa) independent of A1c. <br><small>Reason: ${sglIndication.join(", ")}.</small></li>`;
+                planHtml += `<li>Consider GLP-1 RA if ASCVD predominates or for weight loss.</li>`;
+            } else if (obe || (bmi && bmi > 27.5)) {
+                planHtml += `<li><strong>CKM Stage 2/3 (Obesity driven):</strong> Prioritize GLP-1 RA or SGLT2i for weight management.</li>`;
+            }
+            planHtml += `</ul>`;
+        }
+
+        // 2. Hypertension / Renal Protection
+        if(htn || ckd) {
+            planHtml += `<h4>🩸 Hypertension / Renal Protection</h4><ul>`;
+            if(dm || ckd || acr === 'high' || hf) {
+                planHtml += `<li><strong>First Line:</strong> ACEi or ARB (Essential for albuminuria/DM/CKM Stage 3).</li>`;
+            } else {
+                planHtml += `<li><strong>First Line:</strong> CCB, Thiazide, or ACEi/ARB.</li>`;
+            }
+            if(ckd) planHtml += `<li>Monitor K+ and Creatinine 1-2 weeks after starting RAASi. Accept <30% rise in creatinine.</li>`;
+            planHtml += `</ul>`;
+        }
+
+        // 3. Lipids (ESC/CPG)
+        let needsStatin = false;
+        let statinIntensity = "Moderate";
+        let ldlGoal = "3.0";
+
+        if(cvd || ckd || (dm && egfr < 60)) {
+            needsStatin = true; 
+            statinIntensity = "High (Atorva 40-80 / Rosuva 20-40)";
+            ldlGoal = "1.4 - 1.8";
+        } else if (dm && document.getElementById('plan_age').value > 40) {
+            needsStatin = true;
+            statinIntensity = "Moderate";
+            ldlGoal = "2.6";
+        }
+
+        if(needsStatin || (ldl && ldl > 3.0)) {
+            planHtml += `<h4>🛑 Lipids</h4><ul>`;
+            planHtml += `<li><strong>Target LDL:</strong> < ${ldlGoal} mmol/L.</li>`;
+            if(needsStatin) planHtml += `<li><strong>Statin:</strong> Initiate ${statinIntensity} Intensity Statin.</li>`;
+            planHtml += `</ul>`;
+        }
+
+        // 4. Obesity (CPG Malaysia)
+        if(obe || (bmi && bmi > 23)) {
+            planHtml += `<h4>⚖️ Weight Management (CKM Stage 1+)</h4><ul>`;
+            planHtml += `<li><strong>Diet:</strong> 500kcal deficit/day. Reduce sugar/refined carbs.</li>`;
+            if(bmi > 27.5) {
+                planHtml += `<li><strong>Pharmacotherapy:</strong> Consider if lifestyle fails (Liraglutide, Semaglutide, Phentermine, Orlistat).</li>`;
+            }
+            planHtml += `</ul>`;
+        }
+        
+        if(planHtml === "") planHtml = "<p>No specific risks selected. Focus on healthy lifestyle screening.</p>";
+
+        document.getElementById('plan_content').innerHTML = planHtml;
+        document.getElementById('res_plan').style.display = "block";
+        document.getElementById('res_plan').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
