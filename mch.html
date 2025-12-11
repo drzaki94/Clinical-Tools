@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCH Master Toolkit</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; }
+        
+        /* UI Utilities */
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .tap-target { min-height: 48px; }
+
+        /* Navigation */
+        .nav-btn { position: relative; color: #64748b; font-weight: 600; white-space: nowrap; }
+        .nav-btn.active { color: #0f766e; }
+        .nav-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background-color: #0f766e; border-radius: 3px 3px 0 0;
+        }
+
+        /* Interactive Buttons */
+        .toggle-btn {
+            transition: all 0.2s ease;
+            border: 2px solid #e2e8f0;
+            background-color: white;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .toggle-btn.selected {
+            background-color: #0f766e; border-color: #0f766e; color: white;
+            box-shadow: 0 4px 6px rgba(15, 118, 110, 0.2);
+        }
+
+        /* Modal */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.2s ease; }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: translateY(20px); transition: all 0.2s ease; }
+        .modal.active .modal-content { transform: translateY(0); }
+
+        /* Stepper Visualization */
+        .step-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 2px solid #e2e8f0; }
+        .step-item:last-child { border-left: none; padding-bottom: 0; }
+        .step-circle { 
+            position: absolute; left: -9px; top: 0; 
+            width: 16px; height: 16px; border-radius: 50%; 
+            background: #fff; border: 3px solid #0f766e; 
+        }
+
+        /* Hide scrollbar for nav */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- Header -->
+    <header class="bg-white sticky top-0 z-40 shadow-sm">
+        <div class="bg-slate-900 text-white px-4 py-3">
+            <h1 class="text-xl font-bold flex items-center gap-2 max-w-3xl mx-auto">
+                <i class="ph-fill ph-briefcase-metal text-teal-400"></i>
+                MCH Toolkit
+            </h1>
+        </div>
+        
+        <!-- Scrollable Navigation -->
+        <div class="border-b border-slate-200 bg-white">
+            <div class="flex max-w-3xl mx-auto overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('counseling')" id="nav-counseling" class="nav-btn active flex-1 py-4 px-4 text-sm flex justify-center items-center gap-2 transition hover:bg-slate-50">
+                    <i class="ph-bold ph-chats-circle text-lg"></i> Counselling
+                </button>
+                <button onclick="switchTab('edd')" id="nav-edd" class="nav-btn flex-1 py-4 px-4 text-sm flex justify-center items-center gap-2 transition hover:bg-slate-50">
+                    <i class="ph-bold ph-calendar-check text-lg"></i> EDD Calc
+                </button>
+                <button onclick="switchTab('ppc')" id="nav-ppc" class="nav-btn flex-1 py-4 px-4 text-sm flex justify-center items-center gap-2 transition hover:bg-slate-50">
+                    <i class="ph-bold ph-gender-female text-lg"></i> Contraception
+                </button>
+                <button onclick="switchTab('drugs')" id="nav-drugs" class="nav-btn flex-1 py-4 px-4 text-sm flex justify-center items-center gap-2 transition hover:bg-slate-50">
+                    <i class="ph-bold ph-pill text-lg"></i> Drugs
+                </button>
+                <button onclick="switchTab('procedures')" id="nav-procedures" class="nav-btn flex-1 py-4 px-4 text-sm flex justify-center items-center gap-2 transition hover:bg-slate-50">
+                    <i class="ph-bold ph-scalpel text-lg"></i> Procedures
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto px-4 py-6 min-h-screen">
+        
+        <!-- SEARCH BAR (Hidden in PPC and EDD views) -->
+        <div id="search-wrapper" class="mb-6 relative">
+            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+            <input type="text" id="searchInput" placeholder="Search drug, procedure or diagnosis..." 
+                class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 shadow-sm text-base placeholder-slate-400">
+        </div>
+
+        <!-- VIEW 1: GRID (Counseling / Procedures / Drugs) -->
+        <div id="grid-view" class="space-y-3"></div>
+
+        <!-- VIEW 2: EDD CALCULATOR -->
+        <div id="edd-view" class="hidden space-y-6">
+            
+            <!-- A. Basic Calculator -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2 mb-4">
+                    <i class="ph-fill ph-calculator text-teal-600"></i> Pregnancy Calculator
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">LMP Date</label>
+                            <input type="date" id="calc_lmp" onchange="calcFromLMP()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="flex items-center justify-center text-slate-300">
+                            <i class="ph-bold ph-arrows-left-right text-xl"></i>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">EDD Date</label>
+                            <input type="date" id="calc_edd" onchange="calcFromEDD()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+
+                    <!-- Result Box -->
+                    <div class="bg-teal-50 border border-teal-100 rounded-lg p-4 text-center mt-2">
+                        <p class="text-xs text-teal-600 font-bold uppercase mb-1">Today's Gestational Age (POA)</p>
+                        <div id="calc_poa_result" class="text-3xl font-bold text-teal-900">--</div>
+                        <div id="calc_poa_detail" class="text-sm text-teal-700 mt-1">Select a date above</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B. Redating Tool -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2 mb-2">
+                    <i class="ph-fill ph-calendar-x text-purple-600"></i> Date Confirmation (Redating)
+                </h2>
+                <p class="text-sm text-slate-500 mb-4">Resolve discrepancies. If multiple scans are entered, the <strong>earliest scan</strong> (lowest POA) is automatically prioritized for dating accuracy.</p>
+
+                <div class="space-y-4">
+                    <!-- Step 1: LMP -->
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">1. Reported LMP</label>
+                        <input type="date" id="redate_lmp" class="w-full p-2 border border-slate-300 rounded bg-white">
+                    </div>
+
+                    <!-- Step 2: Scans Container -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">2. Ultrasound Findings</label>
+                        <div id="scans_container" class="space-y-3">
+                            <!-- Scans will be injected here by JS -->
+                        </div>
+                        <button onclick="addScanRow()" class="mt-3 w-full py-2 bg-slate-100 text-slate-600 font-bold rounded-lg border border-slate-200 hover:bg-slate-200 text-sm flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-plus"></i> Add Another Scan
+                        </button>
+                    </div>
+
+                    <button onclick="calculateRedate()" class="w-full py-3 bg-slate-800 text-white font-bold rounded-lg shadow hover:bg-slate-900 transition">
+                        Analyze & Confirm Date
+                    </button>
+
+                    <!-- Result -->
+                    <div id="redate_result" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: PPC CALCULATOR -->
+        <div id="ppc-view" class="hidden">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        <i class="ph-fill ph-faders text-teal-600"></i> Patient Comorbidities
+                    </h2>
+                    <button onclick="resetPPC()" class="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1.5 rounded hover:bg-teal-100 border border-teal-100">RESET</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3" id="comorbid-grid"></div>
+            </div>
+            <div id="ppc-results" class="space-y-4">
+                <div class="text-center py-12 text-slate-400">
+                    <i class="ph-duotone ph-hand-pointing text-4xl mb-3"></i>
+                    <p>Select patient factors above.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- UNIFIED MODAL -->
+    <div id="main-modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-start bg-slate-50">
+                <div>
+                    <span id="modal-tag" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mb-2 inline-block"></span>
+                    <h2 id="modal-title" class="text-xl font-bold text-slate-900 leading-tight"></h2>
+                </div>
+                <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 rounded-full p-2 text-slate-700">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            <div id="modal-body" class="overflow-y-auto p-6 flex-1 bg-white"></div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50">
+                <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg shadow-lg">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // =================================================================
+        // 1. DATA: COUNSELLING (Conditions)
+        // =================================================================
+        const counselingData = [
+             {
+                id: 'anaemia',
+                title: 'Anaemia in Pregnancy',
+                tag: 'Common',
+                tagColor: 'bg-rose-100 text-rose-800',
+                icon: 'ph-drop-half-bottom',
+                iconColor: 'text-rose-600',
+                maternal: ['Cardiac Failure (Hb <5)', 'PPH risk increases', 'Infection susceptibility', 'Fatigue'],
+                fetal: ['IUGR', 'Preterm Birth', 'Low Iron Stores'],
+                note: 'Correct iron technique: Take with Vitamin C/Juice. Avoid milk/coffee/calcium (2h gap).'
+            },
+            {
+                id: 'preexisting_dm',
+                title: 'Pre-existing Diabetes',
+                tag: 'High Risk',
+                tagColor: 'bg-purple-100 text-purple-800',
+                icon: 'ph-insulin',
+                iconColor: 'text-purple-600',
+                maternal: ['Hypoglycemia (1st Tri)', 'Worsening Retinopathy', 'Polyhydramnios'],
+                fetal: ['Congenital Anomalies (Cardiac/NTD)', 'Miscarriage', 'Macrosomia'],
+                note: 'Detailed Anomaly Scan (18-22w) is MANDATORY. Start Aspirin 150mg at 12w.'
+            },
+            {
+                id: 'gdm',
+                title: 'Gestational Diabetes (GDM)',
+                tag: 'Gestational',
+                tagColor: 'bg-teal-100 text-teal-800',
+                icon: 'ph-drop',
+                iconColor: 'text-teal-600',
+                maternal: ['Pre-eclampsia', 'Operative Delivery', 'Future T2DM risk (50%)'],
+                fetal: ['Macrosomia (Shoulder Dystocia)', 'Neonatal Hypoglycemia', 'No anomaly risk'],
+                note: 'Fetal insulin acts as growth hormone -> Macrosomia. Diet control is key.'
+            },
+            {
+                id: 'pe',
+                title: 'Pre-eclampsia / HTN',
+                tag: 'Acute',
+                tagColor: 'bg-red-100 text-red-800',
+                icon: 'ph-siren',
+                iconColor: 'text-red-600',
+                maternal: ['Eclampsia (Fits)', 'HELLP Syndrome', 'Stroke', 'Pulmonary Edema'],
+                fetal: ['Acute Hypoxia', 'Iatrogenic Preterm Birth', 'Abruption'],
+                note: 'WARNING SIGNS: Headache, blurring vision, epigastric pain.'
+            },
+            {
+                id: 'thyroid',
+                title: 'Thyroid Disease',
+                tag: 'Endocrine',
+                tagColor: 'bg-indigo-100 text-indigo-800',
+                icon: 'ph-butterfly',
+                iconColor: 'text-indigo-600',
+                maternal: ['Thyroid Storm (Hyper)', 'Preeclampsia', 'PPH'],
+                fetal: ['Neurodevelopmental delay (Hypo)', 'Fetal Thyrotoxicosis', 'IUGR'],
+                note: 'Keep TSH <2.5 in 1st Tri. PTU preferred in 1st Tri.'
+            },
+            {
+                id: 'postdates',
+                title: 'Post-dates (>40w)',
+                tag: 'Obstetric',
+                tagColor: 'bg-slate-200 text-slate-800',
+                icon: 'ph-calendar-x',
+                iconColor: 'text-slate-600',
+                maternal: ['Labor Dystocia', 'Perineal Trauma', 'C-Section'],
+                fetal: ['Meconium Aspiration', 'Stillbirth risk doubles >42w', 'Fetal Distress'],
+                note: 'Offer Membrane Sweep. IOL by 41 weeks.'
+            },
+            {
+                id: 'gbs',
+                title: 'Group B Streptococcus',
+                tag: 'Infection',
+                tagColor: 'bg-green-100 text-green-800',
+                icon: 'ph-bug',
+                iconColor: 'text-green-600',
+                maternal: ['Chorioamnionitis', 'Endometritis'],
+                fetal: ['Early Onset Sepsis', 'Pneumonia', 'Meningitis'],
+                note: 'Requires Intrapartum Antibiotics (Penicillin) in active labor.'
+            }
+        ];
+
+        // =================================================================
+        // 2. DATA: PROCEDURES (DETAILED STEPPER)
+        // =================================================================
+        const procedureData = [
+            {
+                id: 'implanon', title: 'Implanon NXT Insertion', tag: 'LARC', icon: 'ph-needle',
+                content: {
+                    indication: ['3y Contraception', 'Estrogen CI', 'Breastfeeding'],
+                    contraindication: ['Suspected Pregnancy', 'Unexplained Bleeding', 'Current Breast Ca'],
+                    // New Detailed Structure
+                    steps: [
+                        { title: 'Positioning', text: 'Patient supine, non-dominant arm flexed at elbow, hand under head.' },
+                        { title: 'Marking the Site', text: '<strong>8-10cm proximal</strong> to medial epicondyle. Over the triceps muscle. <br><span class="text-red-600 text-xs font-bold">WARNING: Avoid the sulcus (Neurovascular bundle).</span>' },
+                        { title: 'Anaesthesia', text: 'Clean skin. Infiltrate <strong>2ml Lignocaine</strong> along the subdermal track.' },
+                        { title: 'Puncture', text: 'Remove needle shield. Stretch skin. Puncture at angle <strong>< 30°</strong>.' },
+                        { title: 'Tenting (Crucial)', text: 'Lower applicator to horizontal. <strong>Lift skin</strong> with needle tip to verify subdermal plane. Slide needle fully in.' },
+                        { title: 'Deployment', text: 'Unlock purple slider. <strong>Pull slider back</strong> fully while keeping applicator stationary. (Needle retracts, implant stays).' },
+                        { title: 'Verification', text: 'Palpate ends of the implant. Apply pressure bandage.' }
+                    ],
+                    complication: ['Deep insertion (Neurovascular injury)', 'Migration', 'Infection', 'Expulsion'],
+                    counseling: { pre: ['Bruising is common', 'LA will sting'], post: ['Palpate occasionally', 'Irregular bleeding is common'] }
+                }
+            },
+            {
+                id: 'iucd', title: 'IUCD Insertion', tag: 'LARC', icon: 'ph-anchor',
+                content: {
+                    indication: ['3-5y Contraception', 'Emergency (Copper)', 'Heavy Menses (Mirena)'],
+                    contraindication: ['Pregnancy', 'Active PID/STI', 'Distorted Cavity', 'Wilson Disease (Copper)'],
+                    steps: [
+                        { title: 'Preparation', text: 'Exclude pregnancy. Analgesia (NSAIDs). Bimanual exam to assess version (Ante/Retro).' },
+                        { title: 'Visualization', text: 'Insert speculum. Clean cervix with antiseptic.' },
+                        { title: 'Traction', text: 'Apply <strong>Tenaculum</strong> to anterior lip (12 o\'clock). Pull gently to straighten uterine angle.' },
+                        { title: 'Sounding (Critical)', text: 'Pass Uterine Sound. <strong>No-touch technique</strong>. Measure length (e.g., 7cm).' },
+                        { title: 'Loading', text: 'Set flange on IUCD loader to measured length.' },
+                        { title: 'Insertion', text: 'Insert to fundus until resistance felt.' },
+                        { title: 'Release', text: '<strong>Copper:</strong> Hold rod, pull sheath back. <br><strong>Mirena:</strong> Pull slider back.' },
+                        { title: 'Completion', text: 'Cut threads to 2-3cm. Remove instruments.' }
+                    ],
+                    complication: ['Perforation (1:1000)', 'Expulsion (1:20)', 'Vasovagal Attack', 'PID'],
+                    counseling: { pre: ['Expect cramping', 'Take painkillers'], post: ['Check threads monthly', 'Copper: Heavier periods'] }
+                }
+            },
+            {
+                id: 'speculum', title: 'Speculum Exam', tag: 'Exam', icon: 'ph-flashlight',
+                content: {
+                    indication: ['Bleeding', 'PROM', 'Pap Smear', 'Discharge'],
+                    contraindication: ['Placenta Previa (Major)', 'Severe Vaginismus'],
+                    steps: [
+                        { title: 'Consent & Position', text: 'Lithotomy or dorsal position (heels together). Lubricate speculum (Water only if Pap Smear).' },
+                        { title: 'Insertion', text: 'Part labia. Insert speculum <strong>blades closed, vertically</strong> (handle to side).' },
+                        { title: 'Rotation', text: 'Direct downwards/backwards (towards sacrum). Rotate 90° so handle points down.' },
+                        { title: 'Visualization', text: 'Gently open blades. Identify cervix. Lock screw if needed.' },
+                        { title: 'Removal', text: 'Release screw. Allow blades to close passively while withdrawing.' }
+                    ],
+                    complication: ['Discomfort', 'Trauma/Spotting'],
+                    counseling: { pre: ['Relax pelvic muscles', 'Pressure not pain'], post: ['Spotting is normal'] }
+                }
+            },
+            {
+                id: 'tvs', title: 'Transvaginal Scan', tag: 'Imaging', icon: 'ph-wave-sine',
+                content: {
+                    indication: ['Early pregnancy', 'Ectopic', 'Cervical Length', 'Adnexal Mass'],
+                    contraindication: ['Virginity (Relative)', 'Patient Refusal'],
+                    steps: [
+                        { title: 'Preparation', text: '<strong>Empty Bladder</strong> (Critical for TVS). Explain procedure.' },
+                        { title: 'Probe Setup', text: 'Apply gel. Cover with condom/sheath. Apply gel on top. Eliminate air bubbles.' },
+                        { title: 'Insertion', text: 'Elevate hips. Insert probe gently (or ask patient to guide).' },
+                        { title: 'Orientation', text: '<strong>Anteverted:</strong> Handle down. <br><strong>Retroverted:</strong> Handle up.' },
+                        { title: 'Assessment', text: 'Scan in Sagittal and Transverse planes.' }
+                    ],
+                    complication: ['Discomfort'],
+                    counseling: { pre: ['Safe for pregnancy', 'Better resolution than abdominal scan'], post: ['Discuss findings'] }
+                }
+            }
+        ];
+
+        // =================================================================
+        // 3. DATA: DRUGS & CALCULATORS
+        // =================================================================
+        const drugsData = [
+            {
+                id: 'calc_dvt',
+                title: 'DVT Risk Calculator',
+                keywords: 'thrombosis lmwh clexane innohep',
+                tag: 'Calculator',
+                tagColor: 'bg-red-600 text-white',
+                icon: 'ph-warning-octagon',
+                iconColor: 'text-red-600',
+                isCalc: true,
+                type: 'dvt',
+                desc: 'Risk Assessment & Prophylaxis (RCOG)'
+            },
+            {
+                id: 'calc_iron',
+                title: 'Parenteral Iron Calculator',
+                keywords: 'ganzoni ferinject cosmofer deficit',
+                tag: 'Calculator',
+                tagColor: 'bg-blue-600 text-white',
+                icon: 'ph-calculator',
+                iconColor: 'text-blue-600',
+                isCalc: true,
+                type: 'iron',
+                desc: 'Calculate Total Iron Deficit (Ganzoni)'
+            },
+            {
+                id: 'calc_aspirin',
+                title: 'Aspirin Risk Scorer',
+                keywords: 'preeclampsia prophylaxis',
+                tag: 'Calculator',
+                tagColor: 'bg-teal-600 text-white',
+                icon: 'ph-clipboard-text',
+                iconColor: 'text-teal-600',
+                isCalc: true,
+                type: 'aspirin',
+                desc: 'Pre-eclampsia Prophylaxis Indication'
+            },
+            // --- COMBINED MEDICATION CARDS ---
+            {
+                id: 'diabetes_meds',
+                title: 'Diabetes Medications',
+                keywords: 'metformin insulin actrapid insulatard diabetes gdm',
+                tag: 'Medication Group',
+                tagColor: 'bg-teal-100 text-teal-800',
+                icon: 'ph-drop',
+                content: `
+                    <div class="space-y-4">
+                        <!-- Metformin -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-teal-800 text-lg mb-1">Metformin</h3>
+                            <div class="text-sm bg-green-50 p-2 rounded border border-green-100 mb-2">
+                                <strong>Dose:</strong> 500mg OD/BD initially. Increase weekly. Max 1g BD (2g daily).
+                            </div>
+                            <p class="text-xs text-slate-500"><strong>Note:</strong> Take with/after meals to reduce GI upset (bloating/diarrhea). Crosses placenta but safe.</p>
+                        </div>
+
+                        <!-- Insulin -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200 border-l-4 border-l-purple-500">
+                            <h3 class="font-bold text-purple-800 text-lg mb-1 flex items-center gap-2">Insulin Therapy <i class="ph-fill ph-syringe"></i></h3>
+                            
+                            <div class="mb-3">
+                                <h4 class="text-xs font-bold uppercase text-slate-500 mb-1">Indication for Initiation (GDM)</h4>
+                                <ul class="text-sm space-y-1 list-disc pl-4 text-slate-700">
+                                    <li><strong>Fasting Plasma Glucose (FPG) ≥ 7.0 mmol/L</strong> at diagnosis (Start Immediately +/- Metformin).</li>
+                                    <li><strong>FPG 6.0 - 6.9 mmol/L</strong> with complications (Macrosomia/Polyhydramnios).</li>
+                                    <li><strong>Targets not met</strong> after 1-2 weeks of Metformin/Diet.</li>
+                                </ul>
+                            </div>
+
+                            <div class="mb-3 bg-purple-50 p-2 rounded border border-purple-100">
+                                <h4 class="text-xs font-bold uppercase text-purple-700 mb-1">BSP Targets (Insulin Treated)</h4>
+                                <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                                    <div class="bg-white rounded p-1 shadow-sm"><div class="text-[10px] text-slate-400">Fasting</div><strong>≤ 5.3</strong></div>
+                                    <div class="bg-white rounded p-1 shadow-sm"><div class="text-[10px] text-slate-400">1H Post</div><strong>≤ 7.8</strong></div>
+                                    <div class="bg-white rounded p-1 shadow-sm"><div class="text-[10px] text-slate-400">2H Post</div><strong>≤ 6.7</strong></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-xs font-bold uppercase text-slate-500 mb-1">Common Types</h4>
+                                <div class="text-sm text-slate-700 space-y-1">
+                                    <p><strong>Short Acting (Actrapid):</strong> 30 min pre-meal. Duration 6-8h.</p>
+                                    <p><strong>Intermediate (Insulatard/NPH):</strong> Bedtime (ON) or BD. Duration 12-16h.</p>
+                                    <p><strong>Rapid Analogue (Aspart/Lispro):</strong> Just before meal. For post-prandial spikes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+            },
+            {
+                id: 'anaemia_meds',
+                title: 'Anaemia Medications (Oral)',
+                keywords: 'zincofer iberet maltofer obimin ferrous fumarate iron',
+                tag: 'Medication Group',
+                tagColor: 'bg-rose-100 text-rose-800',
+                icon: 'ph-pill',
+                content: `
+                    <div class="space-y-4">
+                        <!-- Zincofer -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-rose-800 text-lg mb-1">Zincofer</h3>
+                            <p class="text-xs text-slate-500 mb-2">Composition: Fumarate (350mg), B12, Folate, Zinc, Vit C</p>
+                            <div class="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
+                                <span><strong>Dose:</strong> 1 tab OD/BD</span>
+                                <span class="text-xs font-bold text-slate-400">~115mg Elemental</span>
+                            </div>
+                        </div>
+                        <!-- Iberet -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-rose-800 text-lg mb-1">Iberet Folic</h3>
+                            <p class="text-xs text-slate-500 mb-2">Composition: Sulfate (525mg) + Vit C (500mg) + B-Complex</p>
+                            <div class="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
+                                <span><strong>Dose:</strong> 1 tab OD</span>
+                                <span class="text-xs font-bold text-slate-400">~105mg Elemental</span>
+                            </div>
+                            <p class="text-xs mt-2 text-slate-600"><strong>Note:</strong> Controlled Release. High Vit C aids absorption.</p>
+                        </div>
+                        <!-- Maltofer -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-rose-800 text-lg mb-1">Maltofer</h3>
+                            <p class="text-xs text-slate-500 mb-2">Composition: Iron Polymaltose Complex (IPC)</p>
+                            <div class="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
+                                <span><strong>Dose:</strong> 1-2 tabs OD/BD</span>
+                                <span class="text-xs font-bold text-slate-400">100mg Elemental</span>
+                            </div>
+                            <p class="text-xs mt-2 text-slate-600"><strong>Advantage:</strong> Can be taken WITH FOOD. Low GI side effects.</p>
+                        </div>
+                        <!-- Obimin -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200 opacity-90">
+                            <h3 class="font-bold text-rose-800 text-lg mb-1">Obimin / New Obimin</h3>
+                            <div class="bg-yellow-50 text-yellow-800 p-2 rounded text-xs border border-yellow-200">
+                                <strong>Caution:</strong> Low Iron (~30mg elemental). Prophylaxis only.
+                            </div>
+                        </div>
+                        <!-- Fumarate -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-rose-800 text-lg mb-1">Ferrous Fumarate</h3>
+                            <div class="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
+                                <span><strong>Dose:</strong> 200mg TDS</span>
+                                <span class="text-xs font-bold text-slate-400">65mg Elemental/tab</span>
+                            </div>
+                        </div>
+                    </div>`
+            },
+            {
+                id: 'htn_meds',
+                title: 'Antihypertensives',
+                keywords: 'labetalol methyldopa nifedipine adalat hypertension',
+                tag: 'Medication Group',
+                tagColor: 'bg-orange-100 text-orange-800',
+                icon: 'ph-heart-beat',
+                content: `
+                    <div class="space-y-4">
+                        <!-- Labetalol -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-orange-800 text-lg mb-1">Labetalol</h3>
+                            <div class="text-sm bg-green-50 p-2 rounded border border-green-100 mb-2">
+                                <strong>Dose:</strong> 100mg BD start. Max 2400mg/day.
+                            </div>
+                            <div class="text-xs bg-red-50 text-red-800 p-2 rounded">
+                                <strong>Contraindication:</strong> Severe Asthma, Heart Block.
+                            </div>
+                        </div>
+                        <!-- Methyldopa -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-orange-800 text-lg mb-1">Methyldopa</h3>
+                            <div class="text-sm bg-green-50 p-2 rounded border border-green-100 mb-2">
+                                <strong>Dose:</strong> 250mg BD/TDS. Max 3g/day.
+                            </div>
+                            <p class="text-xs mt-2 text-slate-500"><strong>Note:</strong> Safe. Slow onset (48h). Side effects: Sedation.</p>
+                        </div>
+                        <!-- Nifedipine -->
+                        <div class="p-3 border rounded-lg bg-white border-slate-200">
+                            <h3 class="font-bold text-orange-800 text-lg mb-1">Nifedipine</h3>
+                            <div class="text-sm bg-green-50 p-2 rounded border border-green-100 mb-2">
+                                <strong>Dose:</strong> 10mg TDS start. Use Retard/SR.
+                            </div>
+                        </div>
+                    </div>`
+            },
+            // --- OTHER INDIVIDUAL DRUGS ---
+            {
+                id: 'rhogam',
+                title: 'Anti-D (Rhogam)',
+                keywords: 'rhesus negative antibodies',
+                tag: 'Immunology',
+                tagColor: 'bg-slate-200 text-slate-800',
+                icon: 'ph-shield-plus',
+                content: `
+                    <div class="space-y-3">
+                        <div class="p-3 bg-green-50 rounded border border-green-100"><strong>Indication:</strong> Rh- mother, Rh+ baby. Bleeding/Trauma.</div>
+                        <p class="text-sm"><strong>Dose:</strong> 250 IU (<20w), 500 IU (>20w). IM.</p>
+                    </div>`
+            }
+        ];
+
+
+        // =================================================================
+        // 4. DATA: PPC RULES
+        // =================================================================
+        const ppcComorbidities = [
+            { id: 'obesity', label: 'Obesity (BMI >30)', rules: { cocp: 2, pop: 1, dmpa: 1, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'smoker', label: 'Smoker (Age >35)', rules: { cocp: 4, pop: 1, dmpa: 1, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'htn_control', label: 'Hypertension (Controlled)', rules: { cocp: 3, pop: 1, dmpa: 2, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'htn_high', label: 'Hypertension (>160/100)', rules: { cocp: 4, pop: 1, dmpa: 2, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'dm_uncomp', label: 'Diabetes (No Complications)', rules: { cocp: 2, pop: 2, dmpa: 2, implanon: 2, mirena: 2, copper: 1 } },
+            { id: 'dm_vasc', label: 'Diabetes (Vascular)', rules: { cocp: 4, pop: 2, dmpa: 3, implanon: 2, mirena: 2, copper: 1 } },
+            { id: 'migraine', label: 'Migraine WITH Aura', rules: { cocp: 4, pop: 1, dmpa: 1, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'bf_early', label: 'Breastfeeding (<6 weeks)', rules: { cocp: 4, pop: 1, dmpa: 1, implanon: 1, mirena: 1, copper: 1 } },
+            { id: 'dvt_curr', label: 'History of DVT/PE', rules: { cocp: 4, pop: 2, dmpa: 2, implanon: 1, mirena: 1, copper: 1 } }
+        ];
+
+        const methods = {
+            implanon: { name: 'Implanon NXT', type: 'LARC', desc: '3y Implant' },
+            mirena: { name: 'IUS (Mirena)', type: 'LARC', desc: '5y Intrauterine' },
+            copper: { name: 'Copper IUCD', type: 'LARC', desc: 'Non-Hormonal' },
+            dmpa: { name: 'DMPA (Depo)', type: 'Short', desc: '3mo Injection' },
+            pop: { name: 'POP (Mini Pill)', type: 'Short', desc: 'Daily Pill' },
+            cocp: { name: 'COCP', type: 'Short', desc: 'Daily Pill' }
+        };
+
+        // =================================================================
+        // 5. APP LOGIC
+        // =================================================================
+        let currentTab = 'counseling';
+        let selectedComorbidities = new Set();
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${tab}`).classList.add('active');
+
+            const gridView = document.getElementById('grid-view');
+            const ppcView = document.getElementById('ppc-view');
+            const eddView = document.getElementById('edd-view');
+            const searchWrapper = document.getElementById('search-wrapper');
+
+            // Reset all
+            gridView.classList.add('hidden');
+            ppcView.classList.add('hidden');
+            eddView.classList.add('hidden');
+            searchWrapper.classList.add('hidden');
+
+            if(tab === 'ppc') {
+                ppcView.classList.remove('hidden');
+                renderPPCComorbidities();
+            } else if (tab === 'edd') {
+                eddView.classList.remove('hidden');
+                // Set default dates to today for convenience if a scan row exists
+                const firstScan = document.querySelector('.scan-date');
+                if(firstScan && !firstScan.value) {
+                    firstScan.valueAsDate = new Date();
+                }
+            } else {
+                gridView.classList.remove('hidden');
+                searchWrapper.classList.remove('hidden');
+                document.getElementById('searchInput').value = '';
+                renderGrid();
+            }
+        }
+
+        function renderGrid(filter = '') {
+            const container = document.getElementById('grid-view');
+            container.innerHTML = '';
+            
+            let data = [];
+            if(currentTab === 'counseling') data = counselingData;
+            else if(currentTab === 'procedures') data = procedureData;
+            else if(currentTab === 'drugs') data = drugsData;
+
+            // Smart Search: Checks Title AND Keywords
+            const filtered = data.filter(item => {
+                const term = filter.toLowerCase();
+                const titleMatch = item.title.toLowerCase().includes(term);
+                const keywordMatch = item.keywords && item.keywords.includes(term);
+                return titleMatch || keywordMatch;
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-slate-400">No matches found.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `bg-white p-4 rounded-xl card-shadow border border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50 tap-target transition`;
+                div.onclick = () => openModal(item);
+                
+                let bgIcon = 'bg-slate-50 text-slate-600';
+                if(item.isCalc) bgIcon = 'bg-slate-100 text-slate-700';
+                if(item.id === 'calc_iron') bgIcon = 'bg-blue-50 text-blue-600';
+                if(item.id === 'calc_dvt') bgIcon = 'bg-red-50 text-red-600';
+                if(item.id === 'calc_aspirin') bgIcon = 'bg-teal-50 text-teal-600';
+                if(item.id === 'diabetes_meds') bgIcon = 'bg-purple-50 text-purple-600';
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full ${bgIcon} flex items-center justify-center shrink-0">
+                            <i class="ph-fill ${item.icon} text-2xl ${item.iconColor || ''}"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${item.tagColor || 'bg-slate-200 text-slate-700'} mb-1 inline-block">
+                                ${item.tag}
+                            </span>
+                            <h3 class="font-bold text-slate-800 text-lg leading-tight">${item.title}</h3>
+                        </div>
+                    </div>
+                    <i class="ph-bold ph-caret-right text-slate-300 text-xl"></i>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- PPC LOGIC ---
+        function renderPPCComorbidities() {
+            const container = document.getElementById('comorbid-grid');
+            if(container.children.length > 0) return;
+            ppcComorbidities.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'toggle-btn w-full py-3 px-2 rounded-lg text-sm tap-target';
+                btn.innerText = c.label;
+                btn.onclick = () => {
+                    if(selectedComorbidities.has(c.id)) { selectedComorbidities.delete(c.id); btn.classList.remove('selected'); }
+                    else { selectedComorbidities.add(c.id); btn.classList.add('selected'); }
+                    calculatePPC();
+                };
+                container.appendChild(btn);
+            });
+        }
+        function resetPPC() { selectedComorbidities.clear(); document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected')); calculatePPC(); }
+        function calculatePPC() {
+            const container = document.getElementById('ppc-results');
+            if(selectedComorbidities.size === 0) { container.innerHTML = `<div class="text-center py-12 text-slate-400"><i class="ph-duotone ph-hand-pointing text-4xl mb-3"></i><p>Select patient factors.</p></div>`; return; }
+            
+            let scores = { implanon: 1, mirena: 1, copper: 1, dmpa: 1, pop: 1, cocp: 1 };
+            selectedComorbidities.forEach(id => {
+                const rules = ppcComorbidities.find(c => c.id === id).rules;
+                for(let m in scores) if(rules[m] > scores[m]) scores[m] = rules[m];
+            });
+
+            let results = Object.keys(scores).map(key => ({ key, ...methods[key], score: scores[key] }))
+                .sort((a,b) => (a.score > 2) - (b.score > 2) || (a.type !== 'LARC') - (b.type !== 'LARC') || a.score - b.score);
+
+            container.innerHTML = results.map(item => `
+                <div class="p-4 rounded-lg shadow-sm border-l-4 border-slate-100 ${item.score <= 2 ? 'border-l-teal-500 bg-white' : 'border-l-red-500 bg-red-50 opacity-80'} flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-slate-800 ${item.score > 3 ? 'line-through' : ''}">${item.name}</h3>
+                            ${item.type === 'LARC' ? '<span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-1 rounded">LARC</span>' : ''}
+                        </div>
+                        <div class="text-xs text-slate-500">${item.score <= 2 ? 'MEC ' + item.score + ' (Safe)' : 'MEC ' + item.score + ' (Contraindicated)'} • ${item.desc}</div>
+                    </div>
+                    <i class="ph-fill ${item.score <= 2 ? 'ph-check-circle text-teal-500' : 'ph-prohibit text-red-500'} text-2xl"></i>
+                </div>`).join('');
+        }
+
+        // --- EDD CALCULATOR LOGIC ---
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+
+        function getDiffDays(d1, d2) {
+            return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDate(date) {
+            // Display as DD/MM/YYYY
+            const d = date.getDate().toString().padStart(2, '0');
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const y = date.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+        function getPOA(lmpDate) {
+            const today = new Date();
+            const diff = getDiffDays(lmpDate, today);
+            const weeks = Math.floor(diff / 7);
+            const days = diff % 7;
+            return { weeks, days, totalDays: diff };
+        }
+
+        function calcFromLMP() {
+            const lmpInput = document.getElementById('calc_lmp').value;
+            if(!lmpInput) return;
+            const lmp = new Date(lmpInput);
+            
+            const edd = addDays(lmp, 280);
+            document.getElementById('calc_edd').valueAsDate = edd;
+
+            const poa = getPOA(lmp);
+            document.getElementById('calc_poa_result').innerText = `${poa.weeks}w ${poa.days}d`;
+            document.getElementById('calc_poa_detail').innerText = `Based on LMP`;
+        }
+
+        function calcFromEDD() {
+            const eddInput = document.getElementById('calc_edd').value;
+            if(!eddInput) return;
+            const edd = new Date(eddInput);
+            
+            const lmp = addDays(edd, -280);
+            document.getElementById('calc_lmp').valueAsDate = lmp;
+
+            const poa = getPOA(lmp);
+            document.getElementById('calc_poa_result').innerText = `${poa.weeks}w ${poa.days}d`;
+            document.getElementById('calc_poa_detail').innerText = `Based on EDD`;
+        }
+
+        // --- DYNAMIC SCAN ROWS ---
+        function addScanRow() {
+            const container = document.getElementById('scans_container');
+            const index = container.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'scan-row p-3 bg-slate-50 rounded-lg border border-slate-100 relative';
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Scan ${index}</span>
+                    ${index > 1 ? `<button onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700"><i class="ph-bold ph-trash"></i></button>` : ''}
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-[10px] text-slate-400">Date of Scan</span>
+                        <input type="date" class="scan-date w-full p-2 border border-slate-300 rounded bg-white text-sm">
+                    </div>
+                    <div class="flex gap-1">
+                        <div class="w-1/2">
+                            <span class="text-[10px] text-slate-400">Weeks</span>
+                            <input type="number" class="scan-w w-full p-2 border border-slate-300 rounded bg-white text-sm" placeholder="W">
+                        </div>
+                        <div class="w-1/2">
+                            <span class="text-[10px] text-slate-400">Days</span>
+                            <input type="number" class="scan-d w-full p-2 border border-slate-300 rounded bg-white text-sm" placeholder="D">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function calculateRedate() {
+            const lmpStr = document.getElementById('redate_lmp').value;
+            const scanRows = document.querySelectorAll('.scan-row');
+            const container = document.getElementById('redate_result');
+
+            if (!lmpStr) {
+                container.innerHTML = `<div class="p-3 bg-red-100 text-red-800 rounded mt-4 text-center text-sm">Please enter LMP.</div>`;
+                container.classList.remove('hidden');
+                return;
+            }
+
+            // Collect valid scans
+            let validScans = [];
+            scanRows.forEach((row, idx) => {
+                const d = row.querySelector('.scan-date').value;
+                const w = parseInt(row.querySelector('.scan-w').value) || 0;
+                const dy = parseInt(row.querySelector('.scan-d').value) || 0;
+                
+                if(d && (w || dy)) {
+                    const totalDays = (w * 7) + dy;
+                    validScans.push({
+                        id: idx + 1,
+                        date: new Date(d),
+                        totalDays: totalDays,
+                        w: w, d: dy
+                    });
+                }
+            });
+
+            if (validScans.length === 0) {
+                container.innerHTML = `<div class="p-3 bg-red-100 text-red-800 rounded mt-4 text-center text-sm">Please enter at least one valid scan.</div>`;
+                container.classList.remove('hidden');
+                return;
+            }
+
+            // Sort by earliest gestation (POA)
+            // Logic: The scan done at the earliest gestation is usually the most accurate for dating.
+            validScans.sort((a, b) => a.totalDays - b.totalDays);
+            const bestScan = validScans[0]; // Earliest scan
+
+            const lmp = new Date(lmpStr);
+            
+            // 1. Calculate EDD by LMP
+            const eddLMP = addDays(lmp, 280);
+
+            // 2. Calculate EDD by Best Scan
+            const daysRemaining = 280 - bestScan.totalDays;
+            const eddScan = addDays(bestScan.date, daysRemaining);
+
+            // 3. Difference
+            const diffDays = Math.abs(getDiffDays(eddLMP, eddScan));
+
+            // 4. Rule (ACOG / ISUOG / MOH)
+            let useScan = false;
+            let ruleText = "";
+            let threshold = 0;
+            
+            if (bestScan.totalDays < (9 * 7)) { // < 9w0d
+                threshold = 5;
+                ruleText = "<9w scan (Threshold > 5d)";
+            } else if (bestScan.totalDays < (14 * 7)) { // 9w-13w6d
+                threshold = 7;
+                ruleText = "9w-14w scan (Threshold > 7d)";
+            } else if (bestScan.totalDays < (16 * 7)) { // 14w-15w6d
+                threshold = 7;
+                ruleText = "14w-16w scan (Threshold > 7d)";
+            } else if (bestScan.totalDays < (22 * 7)) { // 16w-21w6d
+                threshold = 10;
+                ruleText = "16w-22w scan (Threshold > 10d)";
+            } else { // 22w+
+                threshold = 14;
+                ruleText = "22w+ scan (Threshold > 14d)";
+            }
+
+            if (diffDays > threshold) {
+                useScan = true;
+                ruleText += `: Diff ${diffDays}d. <strong>Redate.</strong>`;
+            } else {
+                ruleText += `: Diff ${diffDays}d. <strong>Keep LMP.</strong>`;
+            }
+
+            const finalDate = useScan ? eddScan : eddLMP;
+            const method = useScan ? `SCAN #${bestScan.id} (REDATED)` : "LMP (CONFIRMED)";
+            const color = useScan ? "purple" : "teal";
+
+            container.innerHTML = `
+                <div class="mt-4 border-t border-slate-200 pt-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-slate-500 uppercase font-bold">LMP EDD</span>
+                        <span class="text-sm font-mono text-slate-700">${formatDate(eddLMP)}</span>
+                    </div>
+                    ${validScans.map(s => `
+                        <div class="flex justify-between items-center mb-1 ${s.id === bestScan.id ? 'font-bold text-purple-700' : 'text-slate-400'}">
+                            <span class="text-xs uppercase">Scan ${s.id} (${s.w}w${s.d}d) EDD ${s.id === bestScan.id ? '<i class="ph-fill ph-star"></i>' : ''}</span>
+                            <span class="text-sm font-mono">${formatDate(addDays(s.date, 280 - s.totalDays))}</span>
+                        </div>
+                    `).join('')}
+                    
+                    <div class="bg-${color}-50 border border-${color}-200 p-4 rounded-xl text-center mt-3">
+                        <p class="text-xs text-${color}-600 font-bold uppercase mb-1">Final REDD (${method})</p>
+                        <p class="text-2xl font-bold text-${color}-900">${formatDate(finalDate)}</p>
+                        <p class="text-xs text-${color}-800 mt-2 bg-white/50 py-1 px-2 rounded inline-block">${ruleText}</p>
+                    </div>
+                </div>
+            `;
+            container.classList.remove('hidden');
+        }
+
+        // --- CALCULATORS (EXISTING) ---
+        function calculateIron() {
+            const weight = parseFloat(document.getElementById('iron_weight').value);
+            const hb = parseFloat(document.getElementById('iron_hb').value);
+            const target = parseFloat(document.getElementById('iron_target').value) || 11.0;
+            if(!weight || !hb) return;
+            const deficit = (weight * (target - hb) * 2.4) + 500;
+            const ampoulesFCM = Math.ceil(deficit / 500); 
+            const ampoulesCosmo = Math.ceil(deficit / 100);
+
+            document.getElementById('iron_result').innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+                    <p class="text-sm text-blue-600 mb-1">Total Iron Deficit</p>
+                    <p class="text-3xl font-bold text-blue-900 mb-4">${Math.round(deficit)} mg</p>
+                    <div class="text-left text-sm space-y-2">
+                        <div class="flex justify-between border-b border-blue-200 pb-1"><span>Ferinject:</span> <strong>${ampoulesFCM} vials</strong> (500mg)</div>
+                        <div class="flex justify-between"><span>Cosmofer:</span> <strong>${ampoulesCosmo} amps</strong> (100mg)</div>
+                    </div>
+                </div>`;
+        }
+
+        function calculateAspirin() {
+            const highRisk = document.querySelectorAll('.asp-high:checked').length;
+            const modRisk = document.querySelectorAll('.asp-mod:checked').length;
+            const result = document.getElementById('aspirin_result');
+            if (highRisk >= 1 || modRisk >= 2) {
+                result.innerHTML = `<div class="bg-red-100 text-red-800 p-4 rounded-lg font-bold text-center border border-red-200">START ASPIRIN 150mg (12 Weeks)</div>`;
+            } else {
+                result.innerHTML = `<div class="bg-green-100 text-green-800 p-4 rounded-lg font-bold text-center border border-green-200">No Prophylaxis Needed</div>`;
+            }
+        }
+
+        function calculateDVT() {
+            let score = 0;
+            const checks = document.querySelectorAll('.dvt-check:checked');
+            checks.forEach(c => score += parseInt(c.value));
+            
+            const result = document.getElementById('dvt_result');
+            let msg = '';
+            let color = '';
+
+            if (score >= 4) {
+                msg = `Score ${score}: HIGH RISK<br>Start LMWH immediately (Antenatal).`;
+                color = 'bg-red-100 text-red-900 border-red-200';
+            } else if (score === 3) {
+                msg = `Score ${score}: MODERATE RISK<br>Start LMWH at 28 Weeks.`;
+                color = 'bg-orange-100 text-orange-900 border-orange-200';
+            } else {
+                msg = `Score ${score}: LOW RISK<br>Hydration & Mobilisation.`;
+                color = 'bg-green-100 text-green-900 border-green-200';
+            }
+            result.innerHTML = `<div class="${color} p-4 rounded-lg font-bold text-center border text-sm">${msg}</div>`;
+        }
+
+        // --- MODAL RENDER ---
+        function openModal(item) {
+            const body = document.getElementById('modal-body');
+            document.getElementById('modal-title').innerText = item.title;
+            const tag = document.getElementById('modal-tag');
+            tag.innerText = item.tag;
+            tag.className = `text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mb-2 inline-block ${item.tagColor || 'bg-slate-200 text-slate-700'}`;
+            body.innerHTML = ''; 
+
+            if (item.isCalc) {
+                if (item.type === 'iron') {
+                    body.innerHTML = `
+                        <div class="space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Weight (kg)</label><input type="number" id="iron_weight" class="w-full p-3 border rounded-lg bg-slate-50"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Current Hb (g/dL)</label><input type="number" id="iron_hb" class="w-full p-3 border rounded-lg bg-slate-50"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Target Hb (Default 11.0)</label><input type="number" id="iron_target" value="11.0" class="w-full p-3 border rounded-lg bg-slate-50"></div>
+                            <button onclick="calculateIron()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Calculate</button>
+                            <div id="iron_result" class="mt-4"></div>
+                        </div>`;
+                } else if (item.type === 'aspirin') {
+                    body.innerHTML = `
+                        <div class="space-y-4">
+                            <div><strong class="text-red-800 text-xs uppercase mb-2 block">High Risk (Need 1)</strong>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-red-50"><input type="checkbox" class="asp-high" onchange="calculateAspirin()"> Prev HTN / Pre-eclampsia</label>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-red-50"><input type="checkbox" class="asp-high" onchange="calculateAspirin()"> CKD / Renal / Autoimmune</label>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-red-50"><input type="checkbox" class="asp-high" onchange="calculateAspirin()"> Diabetes (T1/T2)</label></div>
+                            <div><strong class="text-orange-800 text-xs uppercase mb-2 block">Moderate Risk (Need 2)</strong>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-orange-50"><input type="checkbox" class="asp-mod" onchange="calculateAspirin()"> Nulliparity (First baby)</label>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-orange-50"><input type="checkbox" class="asp-mod" onchange="calculateAspirin()"> Age > 40</label>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-orange-50"><input type="checkbox" class="asp-mod" onchange="calculateAspirin()"> BMI > 35</label>
+                            <label class="flex gap-2 p-2 border rounded mb-1 bg-orange-50"><input type="checkbox" class="asp-mod" onchange="calculateAspirin()"> Family Hx of PE</label></div>
+                            <div id="aspirin_result" class="mt-2"></div>
+                        </div>`;
+                } else if (item.type === 'dvt') {
+                    body.innerHTML = `
+                        <div class="space-y-4">
+                            <p class="text-xs text-slate-500 mb-2">Check all risk factors that apply (Antenatal Assessment):</p>
+                            <div class="space-y-1 max-h-60 overflow-y-auto pr-1">
+                                <label class="flex justify-between p-3 border rounded bg-red-50 border-red-100 items-center"><span class="text-sm font-bold text-red-900">Previous VTE</span> <input type="checkbox" class="dvt-check accent-red-600" value="4" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-red-50 border-red-100 items-center"><span class="text-sm font-bold text-red-900">High Risk Thrombophilia</span> <input type="checkbox" class="dvt-check accent-red-600" value="3" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Family Hx of VTE</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Age > 35</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">BMI > 30</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Parity >= 3</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Smoker</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Gross Varicose Veins</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Pre-eclampsia</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">IVF / ART</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                                <label class="flex justify-between p-3 border rounded bg-white items-center"><span class="text-sm">Multiple Pregnancy</span> <input type="checkbox" class="dvt-check" value="1" onchange="calculateDVT()"></label>
+                            </div>
+                            <div id="dvt_result" class="mt-2 text-center p-2 bg-slate-100 rounded text-sm text-slate-500">Select factors to score.</div>
+                        </div>`;
+                }
+            } else if (currentTab === 'drugs') {
+                body.innerHTML = item.content;
+            } else if(currentTab === 'counseling') {
+                body.innerHTML = `
+                    <div class="mb-4"><strong class="text-rose-800 block mb-1">Maternal Risks</strong><ul class="text-sm list-disc pl-4 space-y-1">${item.maternal.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+                    <div class="mb-4"><strong class="text-sky-800 block mb-1">Fetal Risks</strong><ul class="text-sm list-disc pl-4 space-y-1">${item.fetal.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 text-sm text-amber-900 font-medium">${item.note}</div>`;
+            } else if (currentTab === 'procedures') {
+                const c = item.content;
+                body.innerHTML = `
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-green-50 p-3 rounded text-sm text-green-900 border border-green-100"><strong>Indications</strong><ul class="list-disc pl-4 mt-1">${c.indication.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+                        <div class="bg-red-50 p-3 rounded text-sm text-red-900 border border-red-100"><strong>Contraindications</strong><ul class="list-disc pl-4 mt-1">${c.contraindication.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4 class="font-bold text-slate-800 mb-2">Procedure Steps</h4>
+                        <div class="space-y-0">
+                            ${c.steps.map(step => `
+                                <div class="step-item">
+                                    <div class="step-circle"></div>
+                                    <div class="text-sm font-bold text-slate-800">${step.title}</div>
+                                    <div class="text-sm text-slate-600 mt-1">${step.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 p-3 rounded border border-orange-100 mb-4 text-sm"><strong class="text-orange-900 block mb-1">Complications</strong><ul class="list-disc pl-4 text-orange-900">${c.complication.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+                    
+                    <div class="bg-indigo-50 p-3 rounded border border-indigo-100 text-sm text-indigo-900">
+                        <strong class="block mb-1">Counseling</strong>
+                        <p><strong>Pre:</strong> ${c.counseling.pre.join(', ')}</p>
+                        <p class="mt-1"><strong>Post:</strong> ${c.counseling.post.join(', ')}</p>
+                    </div>`;
+            }
+
+            document.getElementById('main-modal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('main-modal').classList.remove('active'); }
+        document.getElementById('main-modal').addEventListener('click', e => { if(e.target.id === 'main-modal') closeModal(); });
+        document.getElementById('searchInput').addEventListener('input', e => renderGrid(e.target.value));
+
+        // INIT
+        renderGrid();
+        addScanRow(); // Init first scan row
+    </script>
+</body>
+</html>
