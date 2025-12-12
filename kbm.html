@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBM TOOLKIT</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Input Styling */
+        .input-field {
+            background-color: #f8fafc; /* Slate 50 */
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            background-color: #ffffff;
+            border-color: #0d9488; /* Teal 600 */
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        /* Tab Active State */
+        .tab-active {
+            border-bottom: 3px solid #0d9488; /* Teal 600 */
+            color: #0f766e; /* Teal 700 */
+            font-weight: 700;
+            background-color: #f0fdfa; /* Teal 50 */
+        }
+        .tab-inactive {
+            color: #64748b; /* Slate 500 */
+            border-bottom: 3px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #0f766e;
+            border-bottom: 3px solid #cbd5e1;
+        }
+
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; }
+            .shadow-lg { box-shadow: none !important; border: none !important; }
+            .input-field, textarea, select { 
+                border: none !important; 
+                background: transparent !important;
+                padding: 0 !important; 
+                resize: none; 
+            }
+            /* Hide placeholders in print */
+            ::placeholder { color: transparent; }
+            
+            /* Expand textareas for print */
+            textarea { height: auto; overflow: visible; }
+            
+            /* Only show active tab content or specific sections if needed */
+            .tab-content { display: block !important; }
+            /* Hide tabs nav in print */
+            #tab-nav { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-6 sm:py-10 px-4">
+
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header -->
+        <div class="bg-teal-700 text-white p-6 sm:p-8 relative">
+            <div class="flex justify-between items-start">
+                <div class="w-full text-center">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold uppercase tracking-wide">KBM TOOLKIT</h1>
+                    <p class="text-teal-100 text-sm mt-2">Klinik Berhenti Merokok & Education Toolkit</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div id="tab-nav" class="flex border-b border-gray-200 no-print bg-white sticky top-0 z-10">
+            <button onclick="switchTab('clerking')" id="btn-clerking" class="flex-1 py-4 text-center text-sm sm:text-base transition-all tab-active">
+                📝 Clerking Sheet
+            </button>
+            <button onclick="switchTab('education')" id="btn-education" class="flex-1 py-4 text-center text-sm sm:text-base transition-all tab-inactive">
+                🎓 Education
+            </button>
+            <button onclick="switchTab('medication')" id="btn-medication" class="flex-1 py-4 text-center text-sm sm:text-base transition-all tab-inactive">
+                💊 Medication
+            </button>
+        </div>
+
+        <!-- TAB 1: CLERKING SHEET -->
+        <div id="tab-clerking" class="tab-content block">
+            <form id="clerkingForm" class="p-6 sm:p-8 space-y-8">
+
+                <!-- Patient Details (Unnumbered, essential for ID) -->
+                <section class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-gray-100 px-5 py-3 border-b border-gray-200 flex items-center">
+                        <h2 class="text-sm font-bold text-gray-600 uppercase tracking-wide">Patient Details</h2>
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Name (Nama)</label>
+                            <input type="text" id="ptName" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">IC Number (No. KP)</label>
+                            <input type="text" id="ptIC" inputmode="numeric" oninput="validateNumber(this)" placeholder="e.g. 880101..." class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Phone Number</label>
+                            <input type="text" id="ptPhone" inputmode="numeric" oninput="validateNumber(this)" placeholder="e.g. 012..." class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none font-mono">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 1. DATE -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">1</span>
+                        <label class="font-bold text-gray-700">DATE</label>
+                    </div>
+                    <input type="date" id="date" onchange="updateMinTCA()" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none">
+                </section>
+
+                <!-- 2. VISIT NO -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">2</span>
+                        <label class="font-bold text-gray-700">VISIT NO</label>
+                    </div>
+                    <input type="number" id="visitNo" inputmode="numeric" oninput="validateNumber(this)" placeholder="e.g. 2, 3..." class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none font-mono">
+                </section>
+
+                <!-- 3. QUIT DATE -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">3</span>
+                        <label class="font-bold text-gray-700">QUIT DATE</label>
+                    </div>
+                    <input type="date" id="quitDate" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none">
+                </section>
+
+                <!-- 4. FAGERSTROM SCORE -->
+                <section class="bg-white rounded-lg border border-blue-100 shadow-sm overflow-hidden">
+                    <div class="bg-blue-50 px-5 py-3 border-b border-blue-100 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded mr-3">4</span>
+                            <h2 class="text-lg font-bold text-blue-900">FAGERSTROM SCORE</h2>
+                        </div>
+                        <div class="text-right leading-tight">
+                            <div class="text-xs text-blue-600 uppercase font-bold tracking-wider">Result</div>
+                            <div class="text-xl font-bold text-blue-800"><span id="scoreDisplay">0</span> <span class="text-sm font-normal text-blue-600" id="dependenceDisplay">(Very Low)</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 space-y-5 text-sm text-gray-700">
+                        <!-- Q1 -->
+                        <div class="border-b border-dashed border-gray-200 pb-3">
+                            <p class="font-semibold mb-2">1. How soon after you wake up do you smoke your first cigarette? <br><span class="text-gray-500 font-normal italic">(Berapa cepat anda menghisap rokok pertama selepas bangun?)</span></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f1" value="3" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>Within 5 mins (Dalam 5 minit) [3]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f1" value="2" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>6-30 mins (6-30 minit) [2]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f1" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>31-60 mins (31-60 minit) [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f1" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>After 60 mins (Selepas 60 minit) [0]</span></label>
+                            </div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="border-b border-dashed border-gray-200 pb-3">
+                            <p class="font-semibold mb-2">2. Do you find it difficult to refrain from smoking in forbidden places? <br><span class="text-gray-500 font-normal italic">(Adakah anda sukar menahan diri daripada merokok di tempat larangan?)</span></p>
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f2" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>Yes (Ya) [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f2" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>No (Tidak) [0]</span></label>
+                            </div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="border-b border-dashed border-gray-200 pb-3">
+                            <p class="font-semibold mb-2">3. Which cigarette would you hate most to give up? <br><span class="text-gray-500 font-normal italic">(Rokok mana yang paling sukar anda tinggalkan?)</span></p>
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f3" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>First one in AM (Rokok pertama pagi) [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f3" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>Any other (Mana-mana yang lain) [0]</span></label>
+                            </div>
+                        </div>
+                        <!-- Q4 -->
+                        <div class="border-b border-dashed border-gray-200 pb-3">
+                            <p class="font-semibold mb-2">4. How many cigarettes/day? <br><span class="text-gray-500 font-normal italic">(Berapa batang rokok sehari?)</span></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f4" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>10 or less (10 atau kurang) [0]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f4" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>11-20 [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f4" value="2" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>21-30 [2]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f4" value="3" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>31 or more (31 atau lebih) [3]</span></label>
+                            </div>
+                        </div>
+                        <!-- Q5 -->
+                        <div class="border-b border-dashed border-gray-200 pb-3">
+                            <p class="font-semibold mb-2">5. Do you smoke more frequently during the first hours after waking? <br><span class="text-gray-500 font-normal italic">(Adakah anda lebih kerap merokok pada awal pagi?)</span></p>
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f5" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>Yes (Ya) [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f5" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>No (Tidak) [0]</span></label>
+                            </div>
+                        </div>
+                        <!-- Q6 -->
+                        <div>
+                            <p class="font-semibold mb-2">6. Do you smoke if you are so ill that you are in bed most of the day? <br><span class="text-gray-500 font-normal italic">(Adakah anda merokok walaupun sakit terlantar?)</span></p>
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f6" value="1" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>Yes (Ya) [1]</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-1 rounded"><input type="radio" name="f6" value="0" checked="" onchange="calculateFagerstrom()" class="accent-blue-600"> <span>No (Tidak) [0]</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. NO OF CIGARETTES/VAPING -->
+                <section class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center">
+                        <span class="bg-gray-600 text-white text-xs font-bold px-2 py-1 rounded mr-3">5</span>
+                        <h2 class="text-lg font-bold text-gray-800 uppercase">No of Cigarettes/Vaping</h2>
+                    </div>
+                    <div class="p-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-600 mb-1">Quantity</label>
+                                <div class="flex items-center">
+                                    <input type="number" id="cigarettes" placeholder="0" oninput="calculatePackYears()" class="input-field w-24 text-center border border-gray-300 rounded-l-md p-2.5 outline-none font-bold text-gray-700">
+                                    <span class="bg-gray-100 border border-l-0 border-gray-300 text-gray-600 text-sm px-3 py-2.5 rounded-r-md flex-1">sticks/day</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-600 mb-1">Duration</label>
+                                <div class="flex items-center">
+                                    <input type="number" id="smokingYears" placeholder="0" oninput="calculatePackYears()" class="input-field w-24 text-center border border-gray-300 rounded-l-md p-2.5 outline-none font-bold text-gray-700">
+                                    <span class="bg-gray-100 border border-l-0 border-gray-300 text-gray-600 text-sm px-3 py-2.5 rounded-r-md flex-1">years</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Pack Years Result -->
+                        <div class="bg-slate-800 text-white p-3 rounded-md flex justify-between items-center shadow-inner">
+                            <span class="text-sm font-medium opacity-80">PACK YEARS SCORE:</span>
+                            <span id="packYearsDisplay" class="text-xl font-bold text-teal-300">0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. CO BREATH TEST -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">6</span>
+                        <label class="font-bold text-gray-700">CO BREATH TEST</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="number" id="coLevel" placeholder="0" class="input-field w-24 border border-gray-300 rounded-l-md p-2.5 outline-none font-bold text-gray-700">
+                        <span class="bg-gray-100 border border-l-0 border-gray-300 text-gray-600 text-sm px-3 py-2.5 rounded-r-md">ppm</span>
+                    </div>
+                </section>
+
+                <!-- 7. WITHDRAWAL SYMPTOMS -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">7</span>
+                        <label class="font-bold text-gray-700">WITHDRAWAL SYMPTOMS</label>
+                    </div>
+                    <textarea id="withdrawal" rows="3" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none" placeholder="e.g. Cravings, irritability, anxiety..."></textarea>
+                </section>
+
+                <!-- 8. CURRENT ISSUE -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">8</span>
+                        <label class="font-bold text-gray-700">CURRENT ISSUE</label>
+                    </div>
+                    <textarea id="currentIssue" rows="3" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none" placeholder="e.g. Relapse triggers, side effects..."></textarea>
+                </section>
+
+                <!-- 9. PLAN OF CARE -->
+                <section class="bg-white rounded-lg border border-yellow-200 shadow-sm overflow-hidden">
+                    <div class="bg-yellow-50 px-5 py-3 border-b border-yellow-200 flex items-center">
+                        <span class="bg-yellow-600 text-white text-xs font-bold px-2 py-1 rounded mr-3">9</span>
+                        <h2 class="text-lg font-bold text-yellow-900">PLAN OF CARE</h2>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <textarea id="plan" rows="4" class="input-field w-full border border-gray-300 rounded-md p-2.5 outline-none bg-yellow-50/30" placeholder="e.g. Continue pharmacotherapy, counseling strategies..."></textarea>
+                        
+                        <!-- Pharmacotherapy Option -->
+                        <div class="bg-white p-4 rounded-md border border-gray-200">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Pharmacotherapy?</label>
+                            <div class="flex items-center space-x-6 mb-3">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="pharmaOpt" value="no" checked="" onchange="togglePharma(false)" class="w-4 h-4 accent-yellow-600">
+                                    <span class="ml-2 text-sm">No</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="pharmaOpt" value="yes" onchange="togglePharma(true)" class="w-4 h-4 accent-yellow-600">
+                                    <span class="ml-2 text-sm">Yes</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Pharma Details (Hidden by default) -->
+                            <div id="pharmaDetailsDiv" class="hidden space-y-4 pt-3 border-t border-dashed border-gray-200">
+                                <!-- Gum -->
+                                <div>
+                                    <h3 class="font-bold text-gray-700 text-xs uppercase tracking-wide mb-2">Nicorette Gum</h3>
+                                    <div class="flex flex-wrap gap-3">
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="gum2mg" class="w-4 h-4 accent-green-600"> <span class="text-xs font-medium">2 mg</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="gum4mg" class="w-4 h-4 accent-green-600"> <span class="text-xs font-medium">4 mg</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="gumPRN" class="w-4 h-4 accent-green-600"> <span class="text-xs font-medium">PRN</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- Patch -->
+                                <div>
+                                    <h3 class="font-bold text-gray-700 text-xs uppercase tracking-wide mb-2">Nicorette Patch</h3>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="patch25" class="w-4 h-4 accent-green-600"> 
+                                            <span class="text-xs font-medium">25mg/16h (Step 1)</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="patch15" class="w-4 h-4 accent-green-600"> 
+                                            <span class="text-xs font-medium">15mg/16h (Step 2)</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 bg-slate-50 border border-gray-200 rounded px-2 py-1 hover:border-yellow-400 cursor-pointer">
+                                            <input type="checkbox" id="patch10" class="w-4 h-4 accent-green-600"> 
+                                            <span class="text-xs font-medium">10mg/16h (Step 3)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- Other -->
+                                <input type="text" id="pharmaOther" placeholder="Other notes..." class="input-field w-full border border-gray-300 rounded-md p-2 outline-none text-xs">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. NEXT TCA -->
+                <section class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">10</span>
+                        <label class="font-bold text-gray-700">NEXT TCA</label>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <input type="date" id="tcaDate" class="input-field w-full sm:w-auto border border-gray-300 rounded-md p-2.5 outline-none font-bold text-gray-700" min="2025-11-29">
+                    </div>
+                </section>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 no-print border-t border-gray-100">
+                    <button type="button" onclick="exportWord()" class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all active:scale-95">
+                        <span class="mr-2">📄</span> Download Word
+                    </button>
+                    <button type="button" onclick="copySummary()" class="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all active:scale-95">
+                        <span class="mr-2">📋</span> Copy Summary
+                    </button>
+                    <button type="button" id="bottomResetBtn" onclick="handleClearClick('bottom')" class="flex items-center justify-center bg-white border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 font-bold py-3 px-4 rounded-lg shadow-sm transition-all active:scale-95">
+                        <span class="mr-2">🗑️</span> Clear Form
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- TAB 2: EDUCATION -->
+        <div id="tab-education" class="tab-content hidden p-6 sm:p-8 space-y-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Counselling & Education Toolkit</h2>
+
+            <!-- Behavioral Addiction -->
+            <section class="bg-white rounded-lg border border-indigo-100 shadow-sm overflow-hidden">
+                <div class="bg-indigo-50 px-5 py-3 border-b border-indigo-100">
+                    <h3 class="text-lg font-bold text-indigo-900">1. Understanding Behavioral Addiction</h3>
+                </div>
+                <div class="p-5 text-sm text-gray-700 space-y-3">
+                    <p><strong class="text-indigo-700">Definition:</strong> A repeated behavior leading to significant harm or distress. The behavior is not reduced by the person and persists over a substantial period despite functional impairment.</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>Bio-Psycho-Social Model:</strong> Addiction is not just "willpower". It involves biological (genetics, brain circuits), psychological (coping, emotions), and social (environment, peers) factors.</li>
+                        <li><strong>Impaired Control:</strong> Failure to resist impulses, drives, or temptations.</li>
+                        <li><strong>Craving:</strong> Intense desire or urge to engage in the behavior (smoking/vaping).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 5A's & 5R's -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 5A's -->
+                <section class="bg-white rounded-lg border border-green-100 shadow-sm overflow-hidden">
+                    <div class="bg-green-50 px-5 py-3 border-b border-green-100">
+                        <h3 class="text-lg font-bold text-green-900">The 5 A's Strategy</h3>
+                        <p class="text-xs text-green-700">For patients willing to quit</p>
+                    </div>
+                    <div class="p-5 text-sm space-y-3">
+                        <div><strong class="text-green-800">1. ASK:</strong> Systematically identify all tobacco users at every visit.</div>
+                        <div><strong class="text-green-800">2. ADVISE:</strong> Strongly urge all tobacco users to quit. "Quitting is the most important thing you can do for your health."</div>
+                        <div><strong class="text-green-800">3. ASSESS:</strong> Determine willingness to make a quit attempt.</div>
+                        <div><strong class="text-green-800">4. ASSIST:</strong> Aid the patient in quitting (Counseling + Pharmacotherapy). Set a Quit Date (STAR).</div>
+                        <div><strong class="text-green-800">5. ARRANGE:</strong> Schedule follow-up contact (ideally within first week).</div>
+                    </div>
+                </section>
+
+                <!-- 5R's -->
+                <section class="bg-white rounded-lg border border-orange-100 shadow-sm overflow-hidden">
+                    <div class="bg-orange-50 px-5 py-3 border-b border-orange-100">
+                        <h3 class="text-lg font-bold text-orange-900">The 5 R's Strategy</h3>
+                        <p class="text-xs text-orange-700">For patients UNWILLING to quit (Motivational)</p>
+                    </div>
+                    <div class="p-5 text-sm space-y-3">
+                        <div><strong class="text-orange-800">1. RELEVANCE:</strong> Why is quitting personally relevant to *them*? (Family, health, money).</div>
+                        <div><strong class="text-orange-800">2. RISKS:</strong> Ask patient to identify negative consequences (Acute/Long-term).</div>
+                        <div><strong class="text-orange-800">3. REWARDS:</strong> Ask patient to identify potential benefits (Health, taste, smell, money).</div>
+                        <div><strong class="text-orange-800">4. ROADBLOCKS:</strong> Identify barriers (Withdrawal, weight gain, depression) and solutions.</div>
+                        <div><strong class="text-orange-800">5. REPETITION:</strong> Repeat intervention at every visit.</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Cardiovascular Timeline -->
+            <section class="bg-white rounded-lg border border-red-100 shadow-sm overflow-hidden">
+                <div class="bg-red-50 px-5 py-3 border-b border-red-100">
+                    <h3 class="text-lg font-bold text-red-900">Benefits of Stopping Smoking (Timeline)</h3>
+                </div>
+                <div class="p-5">
+                    <div class="relative border-l-2 border-red-200 ml-3 space-y-6">
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">20 Minutes</h4>
+                            <p class="text-sm text-gray-600">Heart rate and blood pressure drop.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">12 Hours</h4>
+                            <p class="text-sm text-gray-600">Carbon monoxide level in blood drops to normal.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">2 Weeks - 3 Months</h4>
+                            <p class="text-sm text-gray-600">Circulation improves and lung function increases.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">1 - 9 Months</h4>
+                            <p class="text-sm text-gray-600">Coughing and shortness of breath decrease.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">1 Year</h4>
+                            <p class="text-sm text-gray-600">Risk of coronary heart disease is about half that of a smoker.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">5 Years</h4>
+                            <p class="text-sm text-gray-600">Stroke risk is reduced to that of a non-smoker 5 to 15 years after quitting.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">10 Years</h4>
+                            <p class="text-sm text-gray-600">Risk of lung cancer falls to about half that of a smoker.</p>
+                        </div>
+                        <div class="ml-6 relative">
+                            <span class="absolute -left-[31px] top-0 bg-red-100 w-4 h-4 rounded-full border-2 border-red-400"></span>
+                            <h4 class="font-bold text-gray-800">15 Years</h4>
+                            <p class="text-sm text-gray-600">Risk of coronary heart disease is that of a non-smoker.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vape / EVALI -->
+            <section class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div class="bg-gray-100 px-5 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-800">E-Cigarette / Vaping Associated Lung Injury (EVALI)</h3>
+                </div>
+                <div class="p-5 text-sm text-gray-700">
+                    <p class="mb-2"><strong>Warning Signs:</strong> Patients with history of vape use (within 90 days) presenting with:</p>
+                    <ul class="list-disc list-inside ml-2 space-y-1">
+                        <li><strong>Respiratory:</strong> Shortness of breath, cough, chest pain.</li>
+                        <li><strong>Gastrointestinal:</strong> Nausea, vomiting, diarrhea, abdominal pain.</li>
+                        <li><strong>Constitutional:</strong> Fever, chills, weight loss.</li>
+                        <li><strong>Signs:</strong> Hypoxia, tachycardia, tachypnea.</li>
+                    </ul>
+                    <div class="mt-3 p-3 bg-red-50 text-red-800 rounded border border-red-100">
+                        <strong>Referral:</strong> Any suspected EVALI case with O2 sat < 95% or respiratory distress requires hospital admission. Consult physician.
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 3: MEDICATION -->
+        <div id="tab-medication" class="tab-content hidden p-6 sm:p-8 space-y-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Pharmacotherapy Guide</h2>
+            <p class="text-sm text-gray-600 mb-6">Applicable for Tobacco Use Disorder and may be used off-label for Nicotine Dependence in Vapers.</p>
+
+            <!-- NRT Section -->
+            <h3 class="text-xl font-bold text-teal-700 border-b border-teal-200 pb-2 mb-4">1. Nicotine Replacement Therapy (NRT)</h3>
+            
+            <div class="space-y-6">
+                <!-- Gum -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Nicotine Gum</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Dosage</span>
+                            <p><strong>2 mg:</strong> If < 20 cigs/day or smoke > 30 mins after waking.</p>
+                            <p><strong>4 mg:</strong> If ≥ 20 cigs/day or smoke ≤ 30 mins after waking.</p>
+                            <p class="mt-1">Max: 24 pieces/day.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Instructions</span>
+                            <ul class="list-disc list-inside">
+                                <li>"Chew & Park" technique.</li>
+                                <li>Chew slowly until peppery taste, then park between cheek and gum.</li>
+                                <li>Avoid acidic drinks (coffee, juice) 15 mins before/during.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Side Effects</span>
+                            <p>Mouth soreness, hiccups, dyspepsia, jaw ache.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patch -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Nicotine Patch</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Dosage</span>
+                            <p><strong>Step 1 (25mg/21mg):</strong> >10 cigs/day.</p>
+                            <p><strong>Step 2 (15mg/14mg):</strong> Tapering / lighter smokers.</p>
+                            <p><strong>Step 3 (10mg/7mg):</strong> Final taper.</p>
+                            <p class="mt-1">Duration: 8-10 weeks.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Instructions</span>
+                            <ul class="list-disc list-inside">
+                                <li>Apply to clean, dry, hairless area (arm/shoulder).</li>
+                                <li>Rotate site daily (wait 1 week before reusing site).</li>
+                                <li>16-hour patch: Remove at bedtime (avoid insomnia).</li>
+                                <li>24-hour patch: Can wear overnight.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Side Effects</span>
+                            <p>Skin reactions (erythema, itching), insomnia (if 24h), vivid dreams.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inhaler / Lozenge -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Inhaler & Lozenge</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <strong class="block text-gray-700">Nicotine Inhaler</strong>
+                            <p><strong>Dose:</strong> 6-16 cartridges/day. Taper over 3 months.</p>
+                            <p><strong>Pros:</strong> Addresses hand-to-mouth fixation.</p>
+                            <p><strong>SE:</strong> Throat irritation, cough.</p>
+                        </div>
+                        <div>
+                            <strong class="block text-gray-700">Nicotine Lozenge</strong>
+                            <p><strong>Dose:</strong> 2 mg / 4 mg. Max 15/day.</p>
+                            <p><strong>Instr:</strong> Allow to dissolve slowly. Do not chew or swallow.</p>
+                            <p><strong>SE:</strong> Nausea, hiccups, heartburn.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Non-NRT Section -->
+            <h3 class="text-xl font-bold text-indigo-700 border-b border-indigo-200 pb-2 mb-4 mt-8">2. Non-Nicotine Medications</h3>
+
+            <div class="space-y-6">
+                <!-- Varenicline -->
+                <div class="bg-white border border-indigo-100 rounded-lg p-4 shadow-sm">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Varenicline (Champix)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Regimen</span>
+                            <p><strong>Start:</strong> 1-2 weeks BEFORE quit date.</p>
+                            <p><strong>Days 1-3:</strong> 0.5 mg OD.</p>
+                            <p><strong>Days 4-7:</strong> 0.5 mg BD.</p>
+                            <p><strong>Day 8+:</strong> 1 mg BD for 12 weeks.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Mechanism</span>
+                            <p>Partial agonist. Reduces craving and blocks reward from smoking.</p>
+                            <p>Take with food and full glass of water.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Side Effects / Caution</span>
+                            <p><strong>SE:</strong> Nausea (most common), abnormal/vivid dreams, headache.</p>
+                            <p><strong>Caution:</strong> Monitor for neuropsychiatric changes. Avoid in severe renal impairment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bupropion -->
+                <div class="bg-white border border-indigo-100 rounded-lg p-4 shadow-sm">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Bupropion SR (Zyban)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Regimen</span>
+                            <p><strong>Start:</strong> 1-2 weeks BEFORE quit date.</p>
+                            <p><strong>Days 1-3:</strong> 150 mg OD.</p>
+                            <p><strong>Day 4+:</strong> 150 mg BD (at least 8h apart).</p>
+                            <p>Duration: 7-12 weeks.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Mechanism</span>
+                            <p>Antidepressant (Dopamine/NE reuptake inhibitor).</p>
+                            <p>Reduces withdrawal severity.</p>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-gray-500 text-xs uppercase">Side Effects / Contraindications</span>
+                            <p><strong>SE:</strong> Insomnia (avoid bedtime dose), dry mouth.</p>
+                            <p><strong>CONTRAINDICATED:</strong> Seizure disorder, Eating disorders (Bulimia/Anorexia), MAOI use.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legal & Copyright Disclaimer -->
+        <div class="bg-slate-50 border-t border-gray-200 p-4 text-xs text-gray-500 leading-snug">
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <p class="font-bold text-gray-700 uppercase mb-1">© 2025 Dr. Muhammad Zaki Abdul Razak</p>
+                    <p>Protected by <strong>Malaysia Copyright Act 1987</strong>. Unauthorized reproduction or use is prohibited.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-gray-700 uppercase mb-1">Medical Disclaimer</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Educational Aid Only:</strong> This tool is for documentation support, not medical advice.</li>
+                        <li><strong>Your Judgment Matters:</strong> Users must independently verify all diagnoses and treatments against current CPGs.</li>
+                        <li><strong>No Liability:</strong> The developer is not liable for any errors or clinical outcomes. Use at your own risk.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-100 p-4 text-center text-xs text-gray-400 border-t border-gray-200 font-mono">
+            KBM TOOLKIT v2.3
+        </div>
+    </div>
+
+    <!-- Hidden Template for Copy/Export (Original content maintained) -->
+    <div id="printTemplate" style="display:none;">
+        <div style="font-family: Arial, sans-serif; color: #000; padding: 20px;">
+            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 18px;">KBM TOOLKIT</h2>
+            </div>
+            
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                <strong>PATIENT DETAILS</strong><br>
+                <span>Name: <span id="p_name"></span></span><br>
+                <span>IC No: <span id="p_ic"></span></span><br>
+                <span>Phone: <span id="p_phone"></span></span>
+            </div>
+
+            <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse; font-size: 14px;">
+                <tbody><tr>
+                    <td style="width: 50%; padding: 5px;"><strong>1. DATE:</strong> <span id="p_date"></span></td>
+                    <td style="width: 50%; padding: 5px;"><strong>2. VISIT NO:</strong> <span id="p_visitNo"></span></td>
+                </tr>
+                 <tr>
+                    <td colspan="2" style="padding: 5px;"><strong>3. QUIT DATE:</strong> <span id="p_quitDate"></span></td>
+                </tr>
+            </tbody></table>
+
+            <div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; font-size: 14px;">
+                <strong>4. FAGERSTROM SCORE:</strong> <span id="p_score"></span> 
+                <br>
+                <em>Impression: <span id="p_dependence"></span></em>
+            </div>
+
+            <div style="margin-bottom: 15px; font-size: 14px;">
+                <strong>5. NO OF CIGARETTES/VAPING:</strong><br>
+                <span>• Quantity: <span id="p_cigarettes"></span> sticks/day</span><br>
+                <span>• Duration: <span id="p_duration"></span> years</span><br>
+                <span>• <strong>Pack Years: <span id="p_packYears"></span></strong></span>
+            </div>
+
+            <div style="margin-bottom: 15px; font-size: 14px;">
+                <strong>6. CO BREATH TEST:</strong> <span id="p_coLevel"></span> ppm
+            </div>
+
+            <div style="margin-bottom: 15px; font-size: 14px;">
+                <strong>7. WITHDRAWAL SYMPTOMS:</strong><br>
+                <span id="p_withdrawal" style="white-space: pre-wrap;"></span>
+            </div>
+
+            <div style="margin-bottom: 15px; font-size: 14px;">
+                <strong>8. CURRENT ISSUE:</strong><br>
+                <span id="p_currentIssue" style="white-space: pre-wrap;"></span>
+            </div>
+
+            <div style="border-top: 1px solid #000; padding-top: 10px; font-size: 14px;">
+                <strong>9. PLAN OF CARE:</strong>
+                <p id="p_plan" style="white-space: pre-wrap; margin-top: 5px; margin-bottom: 10px;"></p>
+                <div style="margin-bottom: 10px;">
+                    <strong>Pharmacotherapy:</strong> <span id="p_pharma"></span>
+                </div>
+                
+                <strong>10. NEXT TCA:</strong> <span id="p_tca"></span>
+            </div>
+            
+             <div style="margin-top: 40px; text-align: right; font-size: 14px;">
+                <p>__________________________</p>
+                <p>Signature / Stamp</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Initialization ---
+        window.onload = function() {
+            setDatesToToday();
+            calculateFagerstrom();
+        };
+
+        // --- Logic: Tabs ---
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('block'));
+            
+            // Show selected tab
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('block');
+
+            // Reset buttons styling
+            const buttons = ['clerking', 'education', 'medication'];
+            buttons.forEach(btn => {
+                const el = document.getElementById('btn-' + btn);
+                if (btn === tabId) {
+                    el.classList.add('tab-active');
+                    el.classList.remove('tab-inactive');
+                } else {
+                    el.classList.remove('tab-active');
+                    el.classList.add('tab-inactive');
+                }
+            });
+        }
+
+        // --- Logic: Clear Form (Robust & Safe) ---
+        let clearClickCount = { top: 0, bottom: 0 };
+        let clearTimeouts = { top: null, bottom: null };
+
+        function handleClearClick(position) {
+            const btnId = 'bottomResetBtn';
+            const btn = document.getElementById(btnId);
+            if(!btn) return; 
+
+            const originalText = '<span class="mr-2">🗑️</span> Clear Form';
+            const confirmText = 'Are you sure? (Click again)';
+            const confirmClass = 'bg-red-600 text-white border-red-700 hover:bg-red-700';
+            const originalClass = 'bg-white border-2 border-red-100 text-red-600 hover:bg-red-50';
+
+            clearClickCount[position]++;
+
+            if (clearClickCount[position] === 1) {
+                // First Click: Change to Warning state
+                btn.innerHTML = confirmText;
+                btn.className = `flex items-center justify-center font-bold py-3 px-4 rounded-lg shadow-sm transition-all active:scale-95 ${confirmClass}`;
+
+                // Reset back if not clicked again in 3 seconds
+                clearTimeouts[position] = setTimeout(() => {
+                    resetClearButton(position, btn, originalText, originalClass);
+                }, 3000);
+            } else {
+                // Second Click: Perform Clear
+                performFullReset();
+                resetClearButton(position, btn, originalText, originalClass);
+            }
+        }
+
+        function resetClearButton(position, btn, text, cls) {
+            clearClickCount[position] = 0;
+            if(clearTimeouts[position]) clearTimeout(clearTimeouts[position]);
+            
+            btn.innerHTML = text;
+            btn.className = `flex items-center justify-center font-bold py-3 px-4 rounded-lg shadow-sm transition-all active:scale-95 ${cls}`;
+        }
+
+        function performFullReset() {
+            document.getElementById('clerkingForm').reset();
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => input.value = '');
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(box => box.checked = false);
+            
+            document.getElementById('packYearsDisplay').innerText = "0";
+            document.getElementById('scoreDisplay').innerText = "0";
+            document.getElementById('dependenceDisplay').innerText = "(Low)";
+            
+            // Reset Pharma section
+            togglePharma(false);
+            
+            setDatesToToday();
+            calculateFagerstrom();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Logic: Dates ---
+        function setDatesToToday() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const today = `${year}-${month}-${day}`;
+            
+            const dateInput = document.getElementById('date');
+            if(dateInput) {
+                dateInput.value = today;
+                updateMinTCA();
+            }
+        }
+        
+        function updateMinTCA() {
+            const dateVal = document.getElementById('date').value;
+            const tcaInput = document.getElementById('tcaDate');
+            if(dateVal && tcaInput) {
+                tcaInput.min = dateVal;
+            }
+        }
+
+        function validateNumber(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        // --- Logic: Calculations ---
+        function calculatePackYears() {
+            const cigs = parseFloat(document.getElementById('cigarettes').value) || 0;
+            const years = parseFloat(document.getElementById('smokingYears').value) || 0;
+            const packYears = (cigs / 20) * years;
+            const formatted = Number.isInteger(packYears) ? packYears : packYears.toFixed(1);
+            document.getElementById('packYearsDisplay').innerText = formatted;
+        }
+
+        function calculateFagerstrom() {
+            let score = 0;
+            const groups = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6'];
+            groups.forEach(group => {
+                const radios = document.getElementsByName(group);
+                for(let radio of radios) {
+                    if(radio.checked) score += parseInt(radio.value);
+                }
+            });
+
+            document.getElementById('scoreDisplay').innerText = score;
+            let dep = "Very Low";
+            if(score <= 2) dep = "Very Low";
+            else if(score <= 4) dep = "Low";
+            else if(score <= 5) dep = "Moderate";
+            else if(score <= 7) dep = "High";
+            else dep = "Very High";
+            document.getElementById('dependenceDisplay').innerText = `(${dep})`;
+        }
+
+        // --- Logic: Pharma Toggle ---
+        function togglePharma(show) {
+            const div = document.getElementById('pharmaDetailsDiv');
+            if(show) {
+                div.classList.remove('hidden');
+            } else {
+                div.classList.add('hidden');
+            }
+        }
+
+        // --- Logic: Export/Copy ---
+        function getVal(id) { 
+            const el = document.getElementById(id);
+            return el ? (el.value || "-") : "-";
+        }
+        
+        function getTxt(id) {
+            const el = document.getElementById(id);
+            return el ? el.innerText : "";
+        }
+
+        function prepareDataForExport() {
+            const set = (id, v) => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = v;
+            };
+
+            set('p_name', getVal('ptName'));
+            set('p_ic', getVal('ptIC'));
+            set('p_phone', getVal('ptPhone'));
+            
+            set('p_date', getVal('date'));
+            set('p_visitNo', getVal('visitNo'));
+            set('p_quitDate', getVal('quitDate'));
+            
+            calculateFagerstrom(); 
+            set('p_score', getTxt('scoreDisplay'));
+            set('p_dependence', getTxt('dependenceDisplay'));
+
+            set('p_cigarettes', getVal('cigarettes'));
+            set('p_duration', getVal('smokingYears'));
+            set('p_packYears', getTxt('packYearsDisplay'));
+            
+            set('p_coLevel', getVal('coLevel'));
+
+            set('p_withdrawal', getVal('withdrawal'));
+            set('p_currentIssue', getVal('currentIssue'));
+            set('p_plan', getVal('plan'));
+            set('p_tca', getVal('tcaDate'));
+
+            // Pharma Logic for Export
+            const isPharma = document.querySelector('input[name="pharmaOpt"]:checked').value === 'yes';
+            let pharmaText = "No";
+            
+            if (isPharma) {
+                let pharma = [];
+                if(document.getElementById('gum2mg').checked) pharma.push("Gum 2mg");
+                if(document.getElementById('gum4mg').checked) pharma.push("Gum 4mg");
+                if(document.getElementById('gumPRN').checked) pharma.push("Gum PRN");
+                if(document.getElementById('patch25').checked) pharma.push("Patch 25mg (Step 1)");
+                if(document.getElementById('patch15').checked) pharma.push("Patch 15mg (Step 2)");
+                if(document.getElementById('patch10').checked) pharma.push("Patch 10mg (Step 3)");
+                
+                const other = getVal('pharmaOther');
+                if(other !== "-") pharma.push(other);
+                
+                pharmaText = "Yes - " + (pharma.length ? pharma.join(", ") : "No details selected");
+            }
+            
+            set('p_pharma', pharmaText);
+        }
+
+        function exportWord() {
+            prepareDataForExport();
+            const element = document.getElementById('printTemplate');
+            var content = element.innerHTML;
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export</title></head><body>";
+            var footer = "</body></html>";
+            var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(header+content+footer);
+            var a = document.createElement("a");
+            a.href = source;
+            a.download = 'KBM_Clerking_Sheet.doc';
+            a.click();
+        }
+
+        function copySummary() {
+            prepareDataForExport();
+            const t = (id) => document.getElementById(id).innerText;
+            
+            const text = `KBM TOOLKIT\n\nPATIENT DETAILS\nName: ${t('p_name')}\nIC: ${t('p_ic')}\nPhone: ${t('p_phone')}\n\n1. DATE: ${t('p_date')}\n2. VISIT NO: ${t('p_visitNo')}\n3. QUIT DATE: ${t('p_quitDate')}\n\n4. FAGERSTROM: ${t('p_score')} ${t('p_dependence')}\n\n5. HISTORY\n${t('p_cigarettes')} sticks/day, ${t('p_duration')} yrs\nPack Years: ${t('p_packYears')}\n\n6. CO LEVEL: ${t('p_coLevel')} ppm\n\n7. WITHDRAWAL SYMPTOMS:\n${t('p_withdrawal')}\n\n8. CURRENT ISSUE:\n${t('p_currentIssue')}\n\n9. PLAN OF CARE:\n${t('p_plan')}\nPharmacotherapy: ${t('p_pharma')}\n\n10. NEXT TCA: ${t('p_tca')}`;
+
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position="fixed"; ta.style.left="-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                alert("Summary copied to clipboard!");
+            } catch(e) {
+                alert("Copy failed.");
+            }
+            document.body.removeChild(ta);
+        }
+    </script>
+
+</body></html>
