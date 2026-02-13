@@ -438,6 +438,7 @@
 <div class="main-tabs">
     <button class="main-tab-btn active" onclick="switchMainTab('dose-calc', event)">💊 Dose Calc</button>
     <button class="main-tab-btn" onclick="switchMainTab('vitals', event)">📈 Vitals</button>
+    <button class="main-tab-btn" onclick="switchMainTab('adhd-asd', event)">🧠 ADHD/ASD</button>
     <button class="main-tab-btn" onclick="switchMainTab('jaundice', event)">👶 NNJ</button>
     <button class="main-tab-btn" onclick="switchMainTab('labs', event)">🧪 Labs</button>
 </div>
@@ -638,6 +639,177 @@
         </div>
     </div>
 
+    <div id="adhd-asd" class="tab-content">
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" onclick="switchAdhdSubTab('adhd')">ADHD</button>
+            <button class="sub-tab-btn" onclick="switchAdhdSubTab('asd')">Autism (ASD)</button>
+        </div>
+
+        <div id="adhd-panel" class="adhd-sub-content">
+            <div class="result-card" style="border-left-color: #3498db; margin-bottom:15px;">
+                <h3>ADHD Quick Clerking</h3>
+                <ul style="font-size:0.85rem; padding-left:18px;">
+                    <li><b>Informants:</b> Must seek info from both Parents AND Teachers.</li>
+                    <li><b>Core Symptoms:</b> Inattention, Hyperactivity, Impulsivity.</li>
+                    <li><b>Criteria (DSM-5):</b> &ge;6 symptoms (5 if &ge;17yo) for 6 months.</li>
+                    <li><b>Settings:</b> Must be present in 2 or more settings (Home/School).</li>
+                    <li><b>Onset:</b> Symptoms present prior to age 12.</li>
+                </ul>
+            </div>
+            
+            <div class="nnj-table-wrapper">
+                <h4>DSM-5 ADHD Domains</h4>
+                <table class="nnj-table">
+                    <tr><th>Inattention (6+)</th><th>Hyper/Impulse (6+)</th></tr>
+                    <tr style="font-size:0.75rem; text-align:left;">
+                        <td>
+                            * Careless mistakes<br>
+                            * Sustaining attention<br>
+                            * Doesn't seem to listen<br>
+                            * Fails follow-through<br>
+                            * Organizing tasks<br>
+                            * Avoids mental effort<br>
+                            * Loses things<br>
+                            * Easily distracted<br>
+                            * Forgetful daily
+                        </td>
+                        <td>
+                            * Fidgets/Squirms<br>
+                            * Leaves seat<br>
+                            * Runs/Climbs (restless)<br>
+                            * Unable to play quietly<br>
+                            * "On the go" / motor<br>
+                            * Talks excessively<br>
+                            * Blurts answers<br>
+                            * Difficulty waiting turn<br>
+                            * Interrupts/Intrudes
+                        </td>
+                    </tr>
+                </table>
+                <div style="padding:5px; font-size:0.7rem; color:#666;">Source: Malaysia CPG (ADHD) 2020</div>
+            </div>
+
+            <div class="result-card danger-sign" style="margin-top:15px;">
+                <h3>Referral Criteria (to Specialist)</h3>
+                <ul style="font-size:0.85rem; padding-left:18px;">
+                    <li><b>Uncertainty</b> of diagnosis.</li>
+                    <li><b>Pre-schoolers</b> (&lt;6 years old).</li>
+                    <li><b>Lack of response</b> to non-pharmacological treatment.</li>
+                    <li><b>Indication</b> to start pharmacotherapy.</li>
+                    <li><b>Severe side effects</b> of medication.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="asd-panel" class="adhd-sub-content hidden">
+            <div class="result-card" style="border-left-color: #9b59b6; margin-bottom:15px;">
+                <h3>Autism (ASD) Quick Clerking</h3>
+                <ul style="font-size:0.85rem; padding-left:18px;">
+                    <li><b>M-CHAT Screening:</b> Routine at 18 & 24 months.</li>
+                    <li><b>Social Comm:</b> Deficits in reciprocity, non-verbal cues, relationships.</li>
+                    <li><b>Behaviours:</b> Repetitive movements, sameness, fixated interests, sensory hypersensitivity.</li>
+                    <li><b>Red Flags:</b> No social smile, no name response, loss of speech.</li>
+                </ul>
+            </div>
+
+            <div class="nnj-table-wrapper">
+                <h4>M-CHAT Scoring (16-30mo)</h4>
+                <table class="nnj-table">
+                    <tr><th>Result</th><th>Criteria</th></tr>
+                    <tr><td><b>FAIL</b></td><td>&ge;2 <b>Critical</b> Items OR &ge;3 <b>Total</b> Items</td></tr>
+                    <tr style="font-size:0.75rem;">
+                        <td colspan="2"><b>Critical:</b> 2 (Interest in peers), 7 (Pointing interest), 9 (Showing objects), 13 (Imitation), 14 (Name response), 15 (Following point).</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="result-card warning-sign" style="margin-top:15px;">
+                <h3>Primary Care Management</h3>
+                <ul style="font-size:0.85rem; padding-left:18px;">
+                    <li><b>Referral:</b> ANY child suspected of ASD regardless of screening results.</li>
+                    <li><b>Workup:</b> Audiological assessment to rule out hearing loss.</li>
+                    <li><b>Social:</b> Register for OKU with Dept of Social Welfare.</li>
+                </ul>
+            </div>
+        </div>
+
+            <div class="result-card" style="border-left-color: #f1c40f; margin-top:20px;">
+                <h3>DSM-5 Symptom Interpreter</h3>
+                <div class="toolkit-input-group">
+                    <label>Patient Age Group</label>
+                    <select id="dx-age" class="toolkit-select" onchange="interpretDx()">
+                        <option value="child">Child / Young Adolescent (&lt; 17 years)</option>
+                        <option value="adult">Older Adolescent / Adult (17+ years)</option>
+                    </select>
+                </div>
+
+                <div class="sub-tabs" style="margin-top:10px;">
+                    <button class="sub-tab-btn active" id="btn-interpret-adhd" onclick="switchInterpret('adhd')">ADHD Criteria</button>
+                    <button class="sub-tab-btn" id="btn-interpret-asd" onclick="switchInterpret('asd')">ASD Criteria</button>
+                </div>
+
+                <div id="interpret-adhd-box">
+                    <p style="font-size:0.8rem; color:#666;">Check observed symptoms (persistent &ge;6 months):</p>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.75rem;">
+                        <div>
+                            <strong style="color:var(--primary);">Inattention</strong><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Careless mistakes</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Sustaining attention</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Doesn't listen</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Fails follow-through</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Difficulty organizing</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Avoids mental effort</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Loses things</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Easily distracted</label><br>
+                            <label><input type="checkbox" class="adhd-inatt" onchange="interpretDx()"> Forgetful daily</label>
+                        </div>
+                        <div>
+                            <strong style="color:var(--primary);">Hyper/Impulse</strong><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Fidgets/Squirms</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Leaves seat</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Runs/Climbs (Restless)</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Unable to play quietly</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> "On the go" / motor</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Talks excessively</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Blurts answers</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Difficulty waiting turn</label><br>
+                            <label><input type="checkbox" class="adhd-hyper" onchange="interpretDx()"> Interrupts/Intrudes</label>
+                        </div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <div style="font-size:0.8rem;">
+                        <label><input type="checkbox" id="adhd-settings" onchange="interpretDx()"> Symptoms in 2+ settings?</label><br>
+                        <label><input type="checkbox" id="adhd-onset" onchange="interpretDx()"> Onset before age 12?</label><br>
+                        <label><input type="checkbox" id="adhd-impair" onchange="interpretDx()"> Clear functional impairment?</label>
+                    </div>
+                </div>
+
+                <div id="interpret-asd-box" class="hidden">
+                    <p style="font-size:0.8rem; color:#666;">Check observed deficits/patterns:</p>
+                    <div style="font-size:0.75rem;">
+                        <strong style="color:var(--primary);">Social Communication (Must have ALL 3)</strong><br>
+                        <label><input type="checkbox" class="asd-social" onchange="interpretDx()"> Social-emotional reciprocity</label><br>
+                        <label><input type="checkbox" class="asd-social" onchange="interpretDx()"> Nonverbal communicative behaviors</label><br>
+                        <label><input type="checkbox" class="asd-social" onchange="interpretDx()"> Developing/Maintaining relationships</label><br>
+                        
+                        <br><strong style="color:var(--primary);">Restricted/Repetitive Patterns (Need &ge;2)</strong><br>
+                        <label><input type="checkbox" class="asd-behav" onchange="interpretDx()"> Stereotyped movements/speech</label><br>
+                        <label><input type="checkbox" class="asd-behav" onchange="interpretDx()"> Insistence on sameness/routines</label><br>
+                        <label><input type="checkbox" class="asd-behav" onchange="interpretDx()"> Highly restricted/fixated interests</label><br>
+                        <label><input type="checkbox" class="asd-behav" onchange="interpretDx()"> Sensory hyper/hypo-reactivity</label><br>
+
+                        <br><strong style="color:var(--primary);">General Criteria</strong><br>
+                        <label><input type="checkbox" id="asd-early" onchange="interpretDx()"> Present in early development?</label><br>
+                        <label><input type="checkbox" id="asd-impair-gen" onchange="interpretDx()"> Significant functional impairment?</label>
+                    </div>
+                </div>
+
+                <div id="dx-result" style="margin-top:15px; padding:10px; border-radius:4px; font-weight:bold; text-align:center; background:#f8f9fa; border:1px solid #eee;">
+                    Result: Pending Input
+                </div>
+            </div></div>
+    </div>
+
     <div id="jaundice" class="tab-content">
         <div class="calc-panel">
             <div class="toolkit-input-group">
@@ -714,11 +886,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>24</td> <td>159</td><td>321</td> <td>149</td><td>304</td> <td>140</td><td>285</td> <td>130</td><td>266</td></tr>
-                    <tr><td>48</td> <td>222</td><td>410</td> <td>212</td><td>395</td> <td>202</td><td>374</td> <td>191</td><td>354</td></tr>
-                    <tr><td>72</td> <td>270</td><td>443</td> <td>258</td><td>431</td> <td>248</td><td>412</td> <td>236</td><td>391</td></tr>
-                    <tr><td>96</td> <td>303</td><td>462</td> <td>291</td><td>455</td> <td>279</td><td>436</td> <td>267</td><td>419</td></tr>
-                    <tr><td>>120</td><td>306</td><td>462</td> <td>294</td><td>456</td> <td>280</td><td>439</td> <td>268</td><td>422</td></tr>
+                    <tr><td>24</td> <td>159<br><small>(9.3)</small></td><td>321<br><small>(18.8)</small></td> <td>149<br><small>(8.7)</small></td><td>304<br><small>(17.8)</small></td> <td>140<br><small>(8.2)</small></td><td>285<br><small>(16.7)</small></td> <td>130<br><small>(7.6)</small></td><td>266<br><small>(15.6)</small></td></tr>
+                    <tr><td>48</td> <td>222<br><small>(13.0)</small></td><td>410<br><small>(24.0)</small></td> <td>212<br><small>(12.4)</small></td><td>395<br><small>(23.1)</small></td> <td>202<br><small>(11.8)</small></td><td>374<br><small>(21.9)</small></td> <td>191<br><small>(11.2)</small></td><td>354<br><small>(20.7)</small></td></tr>
+                    <tr><td>72</td> <td>270<br><small>(15.8)</small></td><td>443<br><small>(25.9)</small></td> <td>258<br><small>(15.1)</small></td><td>431<br><small>(25.2)</small></td> <td>248<br><small>(14.5)</small></td><td>412<br><small>(24.1)</small></td> <td>236<br><small>(13.8)</small></td><td>391<br><small>(22.9)</small></td></tr>
+                    <tr><td>96</td> <td>303<br><small>(17.7)</small></td><td>462<br><small>(27.0)</small></td> <td>291<br><small>(17.0)</small></td><td>455<br><small>(26.6)</small></td> <td>279<br><small>(16.3)</small></td><td>436<br><small>(25.5)</small></td> <td>267<br><small>(15.6)</small></td><td>419<br><small>(24.5)</small></td></tr>
+                    <tr><td>>120</td><td>306<br><small>(17.9)</small></td><td>462<br><small>(27.0)</small></td> <td>294<br><small>(17.2)</small></td><td>456<br><small>(26.7)</small></td> <td>280<br><small>(16.4)</small></td><td>439<br><small>(25.7)</small></td> <td>268<br><small>(15.7)</small></td><td>422<br><small>(24.7)</small></td></tr>
                 </tbody>
             </table>
         </div>
@@ -745,11 +917,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>24</td> <td>128</td><td>303</td> <td>120</td><td>294</td> <td>109</td><td>284</td> <td>101</td><td>275</td></tr>
-                    <tr><td>48</td> <td>188</td><td>344</td> <td>180</td><td>337</td> <td>167</td><td>327</td> <td>157</td><td>316</td></tr>
-                    <tr><td>72</td> <td>232</td><td>378</td> <td>224</td><td>371</td> <td>212</td><td>357</td> <td>198</td><td>344</td></tr>
-                    <tr><td>96</td> <td>260</td><td>402</td> <td>255</td><td>395</td> <td>239</td><td>378</td> <td>224</td><td>361</td></tr>
-                    <tr><td>>120</td><td>260</td><td>402</td> <td>256</td><td>397</td> <td>241</td><td>381</td> <td>227</td><td>364</td></tr>
+                    <tr><td>24</td> <td>128<br><small>(7.5)</small></td><td>303<br><small>(17.7)</small></td> <td>120<br><small>(7.0)</small></td><td>294<br><small>(17.2)</small></td> <td>109<br><small>(6.4)</small></td><td>284<br><small>(16.6)</small></td> <td>101<br><small>(5.9)</small></td><td>275<br><small>(16.1)</small></td></tr>
+                    <tr><td>48</td> <td>188<br><small>(11.0)</small></td><td>344<br><small>(20.1)</small></td> <td>180<br><small>(10.5)</small></td><td>337<br><small>(19.7)</small></td> <td>167<br><small>(9.8)</small></td><td>327<br><small>(19.1)</small></td> <td>157<br><small>(9.2)</small></td><td>316<br><small>(18.5)</small></td></tr>
+                    <tr><td>72</td> <td>232<br><small>(13.6)</small></td><td>378<br><small>(22.1)</small></td> <td>224<br><small>(13.1)</small></td><td>371<br><small>(21.7)</small></td> <td>212<br><small>(12.4)</small></td><td>357<br><small>(20.9)</small></td> <td>198<br><small>(11.6)</small></td><td>344<br><small>(20.1)</small></td></tr>
+                    <tr><td>96</td> <td>260<br><small>(15.2)</small></td><td>402<br><small>(23.5)</small></td> <td>255<br><small>(14.9)</small></td><td>395<br><small>(23.1)</small></td> <td>239<br><small>(14.0)</small></td><td>378<br><small>(22.1)</small></td> <td>224<br><small>(13.1)</small></td><td>361<br><small>(21.1)</small></td></tr>
+                    <tr><td>>120</td><td>260<br><small>(15.2)</small></td><td>402<br><small>(23.5)</small></td> <td>256<br><small>(15.0)</small></td><td>397<br><small>(23.2)</small></td> <td>241<br><small>(14.1)</small></td><td>381<br><small>(22.3)</small></td> <td>227<br><small>(13.3)</small></td><td>364<br><small>(21.3)</small></td></tr>
                 </tbody>
             </table>
             <div style="padding:10px; font-size:0.75rem; color:#555;">
@@ -773,10 +945,10 @@
                     <tr><th class="sub-th">PT</th><th class="sub-th">ET</th><th class="sub-th">PT</th><th class="sub-th">ET</th><th class="sub-th">PT</th><th class="sub-th">ET</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>12h</td> <td>65</td><td>115</td> <td>65</td><td>115</td> <td>70</td><td>120</td></tr>
-                    <tr><td>24h</td> <td>90</td><td>150</td> <td>95</td><td>150</td> <td>100</td><td>155</td></tr>
-                    <tr><td>48h</td> <td>140</td><td>220</td> <td>145</td><td>220</td> <td>155</td><td>230</td></tr>
-                    <tr><td>72h</td> <td>190</td><td>290</td> <td>200</td><td>300</td> <td>210</td><td>310</td></tr>
+                    <tr><td>12h</td> <td>65<br><small>(3.8)</small></td><td>115<br><small>(6.7)</small></td> <td>65<br><small>(3.8)</small></td><td>115<br><small>(6.7)</small></td> <td>70<br><small>(4.1)</small></td><td>120<br><small>(7.0)</small></td></tr>
+                    <tr><td>24h</td> <td>90<br><small>(5.3)</small></td><td>150<br><small>(8.8)</small></td> <td>95<br><small>(5.6)</small></td><td>150<br><small>(8.8)</small></td> <td>100<br><small>(5.8)</small></td><td>155<br><small>(9.1)</small></td></tr>
+                    <tr><td>48h</td> <td>140<br><small>(8.2)</small></td><td>220<br><small>(12.9)</small></td> <td>145<br><small>(8.5)</small></td><td>220<br><small>(12.9)</small></td> <td>155<br><small>(9.1)</small></td><td>230<br><small>(13.5)</small></td></tr>
+                    <tr><td>72h</td> <td>190<br><small>(11.1)</small></td><td>290<br><small>(17.0)</small></td> <td>200<br><small>(11.7)</small></td><td>300<br><small>(17.5)</small></td> <td>210<br><small>(12.3)</small></td><td>310<br><small>(18.1)</small></td></tr>
                 </tbody>
             </table>
             <br>
@@ -788,13 +960,13 @@
                         <th colspan="2">33 Weeks</th>
                         <th colspan="2">34 Weeks</th>
                     </tr>
-                    <tr><th class="sub-th">PT</th><th class="sub-th">ET</th><th class="sub-th">PT</th><th class="sub-th">ET</th><th class="sub-th">PT</th><th class="sub-th">ET</th></tr>
+                    <tr><th class="sub-th">PT</th><th class="sub-th">ET</th><th class="sub-tab-th">PT</th><th class="sub-th">ET</th><th class="sub-th">PT</th><th class="sub-th">ET</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>12h</td> <td>70</td><td>120</td> <td>70</td><td>120</td> <td>70</td><td>120</td></tr>
-                    <tr><td>24h</td> <td>100</td><td>160</td> <td>100</td><td>160</td> <td>110</td><td>170</td></tr>
-                    <tr><td>48h</td> <td>160</td><td>240</td> <td>170</td><td>245</td> <td>170</td><td>250</td></tr>
-                    <tr><td>72h</td> <td>220</td><td>320</td> <td>230</td><td>330</td> <td>240</td><td>340</td></tr>
+                    <tr><td>12h</td> <td>70<br><small>(4.1)</small></td><td>120<br><small>(7.0)</small></td> <td>70<br><small>(4.1)</small></td><td>120<br><small>(7.0)</small></td> <td>70<br><small>(4.1)</small></td><td>120<br><small>(7.0)</small></td></tr>
+                    <tr><td>24h</td> <td>100<br><small>(5.8)</small></td><td>160<br><small>(9.4)</small></td> <td>100<br><small>(5.8)</small></td><td>160<br><small>(9.4)</small></td> <td>110<br><small>(6.4)</small></td><td>170<br><small>(9.9)</small></td></tr>
+                    <tr><td>48h</td> <td>160<br><small>(9.4)</small></td><td>240<br><small>(14.0)</small></td> <td>170<br><small>(9.9)</small></td><td>245<br><small>(14.3)</small></td> <td>170<br><small>(9.9)</small></td><td>250<br><small>(14.6)</small></td></tr>
+                    <tr><td>72h</td> <td>220<br><small>(12.9)</small></td><td>320<br><small>(18.7)</small></td> <td>230<br><small>(13.5)</small></td><td>330<br><small>(19.3)</small></td> <td>240<br><small>(14.0)</small></td><td>340<br><small>(19.9)</small></td></tr>
                 </tbody>
             </table>
         </div>
@@ -814,6 +986,66 @@
 </footer>
 
 <script>
+
+    // --- DX INTERPRETER ---
+    function switchInterpret(mode) {
+        document.getElementById('interpret-adhd-box').classList.toggle('hidden', mode !== 'adhd');
+        document.getElementById('interpret-asd-box').classList.toggle('hidden', mode !== 'asd');
+        document.getElementById('btn-interpret-adhd').classList.toggle('active', mode === 'adhd');
+        document.getElementById('btn-interpret-asd').classList.toggle('active', mode === 'asd');
+        interpretDx();
+    }
+
+    function interpretDx() {
+        const isAdhdVisible = !document.getElementById('interpret-adhd-box').classList.contains('hidden');
+        const ageGroup = document.getElementById('dx-age').value;
+        const resultDiv = document.getElementById('dx-result');
+        const threshold = (ageGroup === 'child') ? 6 : 5;
+
+        if (isAdhdVisible) {
+            const inatt = document.querySelectorAll('.adhd-inatt:checked').length;
+            const hyper = document.querySelectorAll('.adhd-hyper:checked').length;
+            const settings = document.getElementById('adhd-settings').checked;
+            const onset = document.getElementById('adhd-onset').checked;
+            const impair = document.getElementById('adhd-impair').checked;
+
+            let diagnosis = "";
+            if (inatt >= threshold && hyper >= threshold) diagnosis = "Combined Presentation";
+            else if (inatt >= threshold) diagnosis = "Predominantly Inattentive";
+            else if (hyper >= threshold) diagnosis = "Predominantly Hyperactive/Impulsive";
+
+            if (diagnosis && settings && onset && impair) {
+                resultDiv.innerHTML = `<span style="color:var(--danger);">CRITERIA MET: ${diagnosis}</span>`;
+                resultDiv.style.background = "#fff1f0";
+            } else {
+                resultDiv.innerHTML = "Criteria Not Fully Met";
+                resultDiv.style.background = "#f8f9fa";
+            }
+        } else {
+            const social = document.querySelectorAll('.asd-social:checked').length;
+            const behav = document.querySelectorAll('.asd-behav:checked').length;
+            const early = document.getElementById('asd-early').checked;
+            const impair = document.getElementById('asd-impair-gen').checked;
+
+            if (social === 3 && behav >= 2 && early && impair) {
+                resultDiv.innerHTML = `<span style="color:var(--danger);">CRITERIA MET: Autism Spectrum Disorder</span>`;
+                resultDiv.style.background = "#fff1f0";
+            } else {
+                resultDiv.innerHTML = "Criteria Not Fully Met";
+                resultDiv.style.background = "#f8f9fa";
+            }
+        }
+    }
+
+    // --- ADHD / ASD ---
+    function switchAdhdSubTab(subTab) {
+        document.getElementById('adhd-panel').classList.toggle('hidden', subTab !== 'adhd');
+        document.getElementById('asd-panel').classList.toggle('hidden', subTab !== 'asd');
+        document.querySelectorAll('#adhd-asd .sub-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('onclick').includes(subTab));
+        });
+    }
+
     // --- NAVIGATION ---
     function switchMainTab(tabId, event) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
