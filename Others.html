@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Screening Hub (ASSIST & AUDIT-C)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #1e3a8a; font-weight: 700; background-color: #eff6ff; }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        .tab-inactive:hover { color: #334155; background-color: #f1f5f9; }
+        
+        .pill-active { background-color: #2563eb; color: white; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
+        .pill-inactive { background-color: white; color: #64748b; font-weight: 500; border: 1px solid #e2e8f0; }
+        .pill-inactive:hover { background-color: #f1f5f9; color: #334155; }
+
+        .radio-custom { accent-color: #2563eb; width: 1.25rem; height: 1.25rem; cursor: pointer; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; overflow: hidden; }
+        .question-header { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
+        .question-body { padding: 1.5rem; }
+        
+        /* Search highlight animation */
+        .search-target { transition: opacity 0.3s ease; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased pb-20">
+
+<div class="max-w-6xl mx-auto p-4 md:p-6 lg:p-8">
+    
+    <div class="text-center mb-8 pt-4">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900 tracking-tight">Clinical Screening Hub</h1>
+        <h2 class="text-xl md:text-2xl font-medium text-slate-500 italic mt-1">Pusat Saringan Klinikal</h2>
+    </div>
+
+    <div class="relative w-full max-w-2xl mx-auto mb-10">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input type="text" id="searchInput" onkeyup="performSearch()" class="block w-full p-4 pl-12 text-base text-slate-900 border border-slate-300 rounded-2xl bg-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-all placeholder-slate-400" placeholder="Search questions, tools, or links... (Cari soalan, alat, atau pautan...)">
+    </div>
+
+    <div class="flex rounded-t-xl overflow-hidden border border-slate-200 bg-white shadow-sm mb-8">
+        <button id="mainTab1" onclick="switchMainTab('tools')" class="flex-1 py-4 px-4 tab-active transition-colors duration-200 focus:outline-none">
+            <div class="text-lg">Screening Tools</div>
+            <div class="text-sm font-normal italic opacity-80 mt-1">Alat Saringan</div>
+        </button>
+        <button id="mainTab2" onclick="switchMainTab('links')" class="flex-1 py-4 px-4 tab-inactive transition-colors duration-200 focus:outline-none border-l border-slate-200">
+            <div class="text-lg">Other Useful Links</div>
+            <div class="text-sm font-normal italic opacity-80 mt-1">Pautan Berguna Lain</div>
+        </button>
+    </div>
+
+    <div id="sectionTools" class="space-y-6">
+        
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button id="pillAssist" onclick="switchTool('assist')" class="px-8 py-3 rounded-full pill-active transition-all duration-200 text-lg">
+                ASSIST Tool
+            </button>
+            <button id="pillAuditC" onclick="switchTool('auditc')" class="px-8 py-3 rounded-full pill-inactive transition-all duration-200 text-lg">
+                AUDIT-C Tool
+            </button>
+        </div>
+
+        <div id="toolAssist" class="space-y-6">
+            
+            <div class="card mb-8 border-l-4 border-l-blue-600 search-target">
+                <div class="p-5 md:p-6">
+                    <p class="text-slate-800 font-medium leading-relaxed">
+                        The ASSIST is designed to be administered by a health professional as part of a verbal interview with an adult patient, or self-administered electronically. "These substances can be smoked, swallowed, snorted, inhaled, injected or taken in the form of pills."
+                    </p>
+                    <p class="text-slate-500 text-sm italic mt-2 leading-relaxed">
+                        ASSIST direka untuk dikendalikan oleh profesional kesihatan sebagai sebahagian daripada temu bual lisan dengan pesakit dewasa, atau ditadbir sendiri secara elektronik. "Bahan-bahan ini boleh dihisap, ditelan, disedut, disuntik atau diambil dalam bentuk pil."
+                    </p>
+                </div>
+            </div>
+
+            <div class="card search-target">
+                <div class="question-header">
+                    <h2 class="text-lg font-bold text-slate-800">Question 1: In your life, which of the following substances have you ever used? (Non-Medical Use Only)</h2>
+                    <h3 class="text-sm font-medium text-slate-500 italic mt-1">Soalan 1: Sepanjang hidup anda, manakah antara bahan berikut yang pernah anda gunakan? (Bukan Untuk Tujuan Perubatan)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="p-4 font-semibold text-slate-700 w-2/3">
+                                    <div>Substance</div>
+                                    <div class="text-xs text-slate-500 italic font-normal">Bahan</div>
+                                </th>
+                                <th class="p-4 text-center font-semibold text-slate-700">
+                                    <div>No (0)</div>
+                                    <div class="text-xs text-slate-500 italic font-normal">Tidak (0)</div>
+                                </th>
+                                <th class="p-4 text-center font-semibold text-slate-700">
+                                    <div>Yes (3)</div>
+                                    <div class="text-xs text-slate-500 italic font-normal">Ya (3)</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">a. Cannabis (marijuana, pot, grass, hash, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">a. Ganja (marijuana, pot, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_0" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_0" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">b. Cocaine (coke, crack, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">b. Kokain (coke, crack, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_1" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_1" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">c. Prescription stimulants (Ritalin, Adderall, diet pills, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">c. Stimulan preskripsi (Ritalin, Adderall, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_2" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_2" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">d. Methamphetamine (meth, crystal, speed, ecstasy, molly, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">d. Metamfetamin (syabu, pil kuda, ecstasy, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_3" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_3" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">e. Inhalants (nitrous, glue, paint thinner, poppers, whippets, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">e. Bahan sedutan (gam, thinner, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_4" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_4" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">f. Sedatives (sleeping pills, Valium, Xanax, tranquilizers, benzos, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">f. Sedatif (ubat tidur, Valium, Xanax, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_5" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_5" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">g. Hallucinogens (LSD, acid, mushrooms, PCP, Special K, ecstasy, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">g. Halusinogen (LSD, cendawan ajaib, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_6" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_6" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">h. Street opioids (heroin, opium, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">h. Opioid jalanan (heroin, candu, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_7" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_7" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">i. Prescription opioids (Fentanyl, Oxycodone, Percocet, Vicodin, methadone, etc.)</div><div class="text-sm text-slate-500 italic mt-0.5">i. Opioid preskripsi (Fentanyl, metadon, dll)</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_8" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_8" value="3" class="radio-custom"></td></tr>
+                            <tr class="hover:bg-slate-50 transition-colors"><td class="p-4 align-top"><div class="font-medium text-slate-800">j. Any other drugs to get high.</div><div class="text-sm text-slate-500 italic mt-0.5">j. Ubat-ubatan lain untuk khayal.</div></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_9" value="0" class="radio-custom"></td><td class="p-4 align-middle text-center"><input type="radio" name="q1_9" value="3" class="radio-custom"></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="p-4 bg-slate-50 text-sm text-slate-600 border-t border-slate-200">
+                        <span class="font-semibold">Note:</span> Patients who answer "no" to all questions are done. Proceed to Q2 for any "yes".<br>
+                        <span class="italic text-slate-500"><span class="font-semibold">Nota:</span> Pesakit yang menjawab "tidak" untuk semua soalan telah selesai. Teruskan ke S2 untuk sebarang jawapan "ya".</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 p-5 rounded-xl shadow-sm search-target">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-1">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-blue-900 font-medium"><strong>Instructions for Q2-Q5:</strong> Ask these questions for EACH substance the patient selected "Yes" to in Question 1. Calculate the score below for the specific substance being evaluated.</p>
+                        <p class="text-blue-700 text-sm italic mt-1"><strong>Arahan untuk S2-S5:</strong> Tanya soalan-soalan ini untuk SETIAP bahan yang pesakit tandakan "Ya" pada Soalan 1. Kira skor di bawah untuk bahan spesifik yang sedang dinilai.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q2. In the past three months, how often have you used the substances?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S2. Dalam tiga bulan lepas, berapa kerap anda menggunakan bahan tersebut?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q2" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q2" value="2" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Once or twice (2)</div><div class="text-sm text-slate-500 italic">Sekali atau dua kali (2)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q2" value="3" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Monthly (3)</div><div class="text-sm text-slate-500 italic">Bulanan (3)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q2" value="4" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Weekly (4)</div><div class="text-sm text-slate-500 italic">Mingguan (4)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q2" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Daily or almost daily (6)</div><div class="text-sm text-slate-500 italic">Setiap hari / hampir setiap hari (6)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q3. During the past 3 months, how often have you had a strong desire or urge to use?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S3. Dalam 3 bulan lepas, berapa kerap anda mempunyai keinginan kuat untuk menggunakannya?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q3" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q3" value="3" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Once or twice (3)</div><div class="text-sm text-slate-500 italic">Sekali atau dua kali (3)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q3" value="4" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Monthly (4)</div><div class="text-sm text-slate-500 italic">Bulanan (4)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q3" value="5" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Weekly (5)</div><div class="text-sm text-slate-500 italic">Mingguan (5)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q3" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Daily or almost daily (6)</div><div class="text-sm text-slate-500 italic">Setiap hari / hampir setiap hari (6)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q4. During the past 3 months, how often has your use led to health, social, legal or financial problems?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S4. Dalam 3 bulan lepas, berapa kerap penggunaan anda menyebabkan masalah kesihatan, sosial, undang-undang/kewangan?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q4" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q4" value="4" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Once or twice (4)</div><div class="text-sm text-slate-500 italic">Sekali atau dua kali (4)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q4" value="5" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Monthly (5)</div><div class="text-sm text-slate-500 italic">Bulanan (5)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q4" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Weekly (6)</div><div class="text-sm text-slate-500 italic">Mingguan (6)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q4" value="7" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Daily or almost daily (7)</div><div class="text-sm text-slate-500 italic">Setiap hari / hampir setiap hari (7)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q5. During the past 3 months, how often have you failed to do what was normally expected of you because of your use?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S5. Dalam 3 bulan lepas, berapa kerap anda gagal melakukan apa yang diharapkan kerana penggunaan anda?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q5" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q5" value="5" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Once or twice (5)</div><div class="text-sm text-slate-500 italic">Sekali atau dua kali (5)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q5" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Monthly (6)</div><div class="text-sm text-slate-500 italic">Bulanan (6)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q5" value="7" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Weekly (7)</div><div class="text-sm text-slate-500 italic">Mingguan (7)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="assist_q5" value="8" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Daily or almost daily (8)</div><div class="text-sm text-slate-500 italic">Setiap hari / hampir setiap hari (8)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card search-target">
+                <div class="question-header bg-slate-100">
+                    <h2 class="text-xl font-bold text-slate-800">Lifetime Impact Questions</h2>
+                    <h3 class="text-base font-medium text-slate-600 italic mt-1">Soalan Impak Sepanjang Hayat</h3>
+                </div>
+                
+                <div class="question-body border-b border-slate-200">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-slate-800 text-lg">Q6. Has a friend or relative or anyone else ever expressed concern about your use?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S6. Pernahkah rakan atau saudara mara menyatakan kebimbangan tentang penggunaan anda?</h4>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q6" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">No, never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label>
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q6" value="3" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Yes, but not in the past 3 months (3)</div><div class="text-sm text-slate-500 italic">Ya, tetapi bukan dalam 3 bulan lepas (3)</div></div></label>
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q6" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Yes, in the past 3 months (6)</div><div class="text-sm text-slate-500 italic">Ya, dalam 3 bulan lepas (6)</div></div></label>
+                    </div>
+                </div>
+
+                <div class="question-body">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-slate-800 text-lg">Q7. Have you ever tried and failed to control, cut down or stop using?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S7. Pernahkah anda cuba dan gagal untuk mengawal, mengurangkan atau berhenti menggunakannya?</h4>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q7" value="0" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">No, never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label>
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q7" value="3" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Yes, but not in the past 3 months (3)</div><div class="text-sm text-slate-500 italic">Ya, tetapi bukan dalam 3 bulan lepas (3)</div></div></label>
+                        <label class="flex items-start cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors"><input type="radio" name="assist_q7" value="6" onchange="calculateAssistScore()" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Yes, in the past 3 months (6)</div><div class="text-sm text-slate-500 italic">Ya, dalam 3 bulan lepas (6)</div></div></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-2 border-red-400 overflow-hidden search-target">
+                <div class="bg-red-50 p-4 border-b border-red-200 flex items-center">
+                    <svg class="w-6 h-6 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <h2 class="text-xl font-bold text-red-800">Q8. Injection Drug Use</h2>
+                        <h3 class="text-sm font-medium text-red-600 italic mt-0.5">S8. Penggunaan Dadah Suntikan</h3>
+                    </div>
+                </div>
+                
+                <div class="question-body bg-white">
+                    <div class="mb-5">
+                        <p class="font-bold text-slate-800 text-lg">Have you ever used any drug by injection? (NON-MEDICAL USE ONLY)</p>
+                        <p class="text-sm font-medium text-slate-500 italic mt-1">Pernahkah anda menggunakan sebarang dadah melalui suntikan? (BUKAN UNTUK TUJUAN PERUBATAN)</p>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <label class="flex items-start cursor-pointer"><input type="radio" name="assist_q8" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">No, never</div><div class="text-sm text-slate-500 italic">Tidak pernah</div></div></label>
+                        <label class="flex items-start cursor-pointer"><input type="radio" name="assist_q8" class="radio-custom mt-0.5 mr-3"><div><div class="text-slate-800 font-medium">Yes, but not in the past 3 months</div><div class="text-sm text-slate-500 italic">Ya, tetapi bukan dalam 3 bulan lepas</div></div></label>
+                        <label class="flex items-start cursor-pointer"><input type="radio" name="assist_q8" class="radio-custom mt-0.5 mr-3 accent-red-600"><div><div class="text-red-700 font-bold">Yes, in the past 3 months</div><div class="text-sm text-red-500 italic font-medium">Ya, dalam 3 bulan lepas</div></div></label>
+                    </div>
+                    
+                    <div class="mt-6 p-5 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="mb-4 pb-2 border-b border-red-200">
+                            <p class="text-slate-800 font-semibold">If "Yes, in the past 3 months", ask the extra drug injection questions:</p>
+                            <p class="text-sm text-slate-600 italic mt-1">Jika "Ya, dalam 3 bulan lepas", tanya soalan tambahan ini:</p>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                                <div class="mb-3 md:mb-0 w-full md:w-1/2">
+                                    <span class="font-medium text-slate-800 block">During the past three months, how often have you injected drugs?</span>
+                                    <span class="text-sm text-slate-500 italic block mt-1">Dalam 3 bulan lepas, berapa kerap anda menyuntik dadah?</span>
+                                </div>
+                                <div class="flex flex-col space-y-2 w-full md:w-1/2 md:items-end">
+                                    <label class="flex items-center cursor-pointer bg-white p-2 rounded border border-slate-200 w-full md:w-64"><input type="radio" name="assist_q8a" class="radio-custom mr-3"><div><div class="text-sm font-medium">Once per week or less</div><div class="text-xs text-slate-500 italic">Sekali seminggu / kurang</div></div></label>
+                                    <label class="flex items-center cursor-pointer bg-white p-2 rounded border border-slate-200 w-full md:w-64"><input type="radio" name="assist_q8a" class="radio-custom mr-3"><div><div class="text-sm font-medium">More than once per week</div><div class="text-xs text-slate-500 italic">Lebih dari sekali seminggu</div></div></label>
+                                </div>
+                            </div>
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center border-t border-red-100 pt-4">
+                                <div class="mb-3 md:mb-0 w-full md:w-1/2">
+                                    <span class="font-medium text-slate-800 block">Have you ever injected drugs three or more days in a row?</span>
+                                    <span class="text-sm text-slate-500 italic block mt-1">Pernahkah anda menyuntik dadah tiga hari berturut-turut atau lebih?</span>
+                                </div>
+                                <div class="flex space-x-4 w-full md:w-1/2 md:justify-end">
+                                    <label class="flex items-center cursor-pointer bg-white py-2 px-4 rounded border border-slate-200 flex-1 md:flex-none md:w-28 justify-center"><input type="radio" name="assist_q8b" class="radio-custom mr-2"><div><div class="text-sm font-medium">Yes</div><div class="text-xs text-slate-500 italic">Ya</div></div></label>
+                                    <label class="flex items-center cursor-pointer bg-white py-2 px-4 rounded border border-slate-200 flex-1 md:flex-none md:w-28 justify-center"><input type="radio" name="assist_q8b" class="radio-custom mr-2"><div><div class="text-sm font-medium">No</div><div class="text-xs text-slate-500 italic">Tidak</div></div></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-600 rounded-xl shadow-lg p-6 flex flex-col md:flex-row justify-between items-center text-white border border-blue-800 transform transition-all search-target">
+                <div class="mb-4 md:mb-0 w-full md:w-2/3">
+                    <h2 class="text-2xl font-bold flex items-center">
+                        <svg class="w-8 h-8 mr-3 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        ASSIST Specific Substance Score
+                    </h2>
+                    <h3 class="text-lg font-medium text-blue-200 italic mt-1">Jumlah Skor ASSIST Bahan Spesifik</h3>
+                    <p class="text-sm text-blue-100 mt-2 bg-blue-700 bg-opacity-50 p-3 rounded border border-blue-500">
+                        <span class="block font-medium">Sum of Q2 through Q7 for the specific substance evaluated.</span>
+                        <span class="block italic mt-1 text-blue-200">Hasil tambah S2 hingga S7 untuk bahan spesifik yang dinilai.</span>
+                    </p>
+                </div>
+                <div class="w-full md:w-1/3 flex justify-end">
+                    <div class="bg-white rounded-lg p-4 shadow-inner flex items-center space-x-4 border-2 border-blue-300 w-full md:w-auto justify-center">
+                        <div class="text-center">
+                            <div class="text-slate-700 font-bold text-sm uppercase tracking-wider">Total Score</div>
+                            <div class="text-slate-400 font-medium text-xs italic mt-0.5">Jumlah Skor</div>
+                        </div>
+                        <input type="text" id="assistScoreResult" class="w-20 md:w-24 bg-slate-50 border border-slate-300 p-2 rounded text-blue-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none" value="0" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8 search-target">
+                <div class="border-b-2 border-slate-100 pb-4 mb-6">
+                    <h2 class="text-3xl font-extrabold text-slate-800">ASSIST Score Interpretation</h2>
+                    <h3 class="text-xl font-medium text-slate-500 italic mt-1">Tafsiran Skor ASSIST dan Tindakan Digalakkan</h3>
+                </div>
+                
+                <div class="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 text-slate-700">
+                    <p class="font-medium mb-1">Calculate the total score for questions #2–7 for each specific substance. Compare the score to the table below.</p>
+                    <p class="text-sm italic text-slate-500">Kira jumlah skor untuk soalan #2-7 bagi setiap bahan tertentu. Bandingkan skor dengan jadual di bawah.</p>
+                </div>
+
+                <div class="overflow-x-auto mb-8 shadow-sm rounded-lg border border-slate-200">
+                    <table class="w-full text-left border-collapse bg-white">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700">
+                                <th class="p-4 border-b border-r border-slate-200 w-1/4">
+                                    <div class="font-bold text-lg">Score</div><div class="font-normal italic text-sm text-slate-500">Skor</div>
+                                </th>
+                                <th class="p-4 border-b border-slate-200">
+                                    <div class="font-bold text-lg">Indicated Response</div><div class="font-normal italic text-sm text-slate-500">Tindakan Digalakkan</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="hover:bg-green-50 transition-colors">
+                                <td class="p-4 border-r align-top">
+                                    <div class="font-extrabold text-2xl text-green-700">0 – 3</div><div class="text-sm text-green-600 mt-2 font-medium">(0 – 4 for cannabis)</div><div class="text-xs text-green-500 italic mt-0.5">(0 - 4 untuk ganja)</div>
+                                </td>
+                                <td class="p-4 align-top">
+                                    <div class="text-slate-800"><strong class="text-green-800">Brief education:</strong> Inform patients about the risks of illicit drug use and signs of a substance use disorder.</div>
+                                    <div class="text-slate-600 italic text-sm mt-2"><strong class="text-green-700">Pendidikan ringkas:</strong> Maklumkan pesakit tentang risiko dan tanda-tanda kecelaruan penggunaan bahan.</div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-yellow-50 transition-colors">
+                                <td class="p-4 border-r align-top">
+                                    <div class="font-extrabold text-2xl text-yellow-600">4 – 26</div><div class="text-sm text-yellow-600 mt-2 font-medium">(5 – 26 for cannabis)</div><div class="text-xs text-yellow-500 italic mt-0.5">(5 - 26 untuk ganja)</div>
+                                </td>
+                                <td class="p-4 align-top">
+                                    <div class="text-slate-800"><strong class="text-yellow-700">Brief intervention:</strong> Patient-centered discussion that employs Motivational Interviewing concepts to raise awareness and enhance motivation to change. Typically 3-15 minutes.</div>
+                                    <div class="text-slate-600 italic text-sm mt-2"><strong class="text-yellow-600">Intervensi ringkas:</strong> Perbincangan berpusatkan pesakit (3-15 minit) menggunakan kaedah Temu Bual Motivasi.</div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-red-50 transition-colors">
+                                <td class="p-4 border-r align-top"><div class="font-extrabold text-2xl text-red-700">27+</div></td>
+                                <td class="p-4 align-top">
+                                    <div class="text-slate-800"><strong class="text-red-800">Brief intervention & Referral:</strong> Offer options that include treatment. A proactive process facilitating access to specialized care, including definitive assessment or prescribing medications.</div>
+                                    <div class="text-slate-600 italic text-sm mt-2"><strong class="text-red-700">Intervensi ringkas & Rujukan:</strong> Tawarkan pilihan rawatan dan rujuk kepada pakar rawatan dadah.</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-lg shadow-sm">
+                    <div class="flex items-center mb-3">
+                        <svg class="w-6 h-6 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <div>
+                            <h4 class="font-bold text-lg text-amber-900">Injection Use Override</h4>
+                            <h5 class="text-sm font-medium text-amber-700 italic">Pengecualian Suntikan</h5>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-amber-900 font-medium leading-relaxed">Patients who have injected drugs in the last three months, but no more than once per week or never more than three days in a row, should receive a brief intervention.</p>
+                            <p class="text-amber-700 text-sm italic mt-1 leading-relaxed">Pesakit yang menyuntik dadah dalam 3 bulan lepas (tidak melebihi sekali seminggu / tidak melebihi 3 hari berturut-turut) mesti menerima intervensi ringkas.</p>
+                        </div>
+                        <div class="border-t border-amber-200 pt-3">
+                            <p class="text-amber-900 font-medium leading-relaxed">All other patients who have injected drugs in the last three months should receive a brief intervention that includes options for treatment.</p>
+                            <p class="text-amber-700 text-sm italic mt-1 leading-relaxed">Pesakit lain yang menyuntik dadah dalam 3 bulan lepas mesti menerima intervensi ringkas berserta pilihan rawatan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toolAuditC" class="hidden space-y-6">
+            
+            <div class="card mb-8 border-l-4 border-l-purple-600 search-target">
+                <div class="p-5 md:p-6">
+                    <p class="text-slate-800 font-medium leading-relaxed">
+                        The AUDIT-C is a 3-item alcohol screen that can help identify persons who are hazardous drinkers or have active alcohol use disorders (including alcohol abuse or dependence).
+                    </p>
+                    <p class="text-slate-500 text-sm italic mt-2 leading-relaxed">
+                        AUDIT-C ialah saringan alkohol 3 item yang boleh membantu mengenal pasti peminum berisiko atau mereka yang mempunyai gangguan penggunaan alkohol aktif.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6">
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q1. How often do you have a drink containing alcohol?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S1. Berapa kerap anda minum minuman yang mengandungi alkohol?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q1" value="0" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q1" value="1" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Monthly or less (1)</div><div class="text-sm text-slate-500 italic">Sebulan sekali atau kurang (1)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q1" value="2" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">2 to 4 times a month (2)</div><div class="text-sm text-slate-500 italic">2-4 kali sebulan (2)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q1" value="3" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">2 to 3 times a week (3)</div><div class="text-sm text-slate-500 italic">2-3 kali seminggu (3)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q1" value="4" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">4 or more times a week (4)</div><div class="text-sm text-slate-500 italic">4 kali atau lebih seminggu (4)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q2. How many standard drinks containing alcohol do you have on a typical day?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S2. Berapa banyak minuman standard yang mengandungi alkohol yang anda minum pada hari biasa?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q2" value="0" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">1 or 2 (0)</div><div class="text-sm text-slate-500 italic">1 atau 2 (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q2" value="1" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">3 or 4 (1)</div><div class="text-sm text-slate-500 italic">3 atau 4 (1)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q2" value="2" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">5 or 6 (2)</div><div class="text-sm text-slate-500 italic">5 atau 6 (2)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q2" value="3" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">7 to 9 (3)</div><div class="text-sm text-slate-500 italic">7 hingga 9 (3)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q2" value="4" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">10 or more (4)</div><div class="text-sm text-slate-500 italic">10 atau lebih (4)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card search-target">
+                    <div class="question-header">
+                        <h3 class="font-bold text-slate-800">Q3. How often do you have six or more drinks on one occasion?</h3>
+                        <h4 class="text-sm font-medium text-slate-500 italic mt-1">S3. Berapa kerap anda mengambil enam atau lebih minuman pada satu-satu masa?</h4>
+                    </div>
+                    <div class="question-body">
+                        <ul class="space-y-3">
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q3" value="0" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Never (0)</div><div class="text-sm text-slate-500 italic">Tidak pernah (0)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q3" value="1" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Less than monthly (1)</div><div class="text-sm text-slate-500 italic">Kurang daripada sebulan sekali (1)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q3" value="2" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Monthly (2)</div><div class="text-sm text-slate-500 italic">Sebulan sekali (2)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q3" value="3" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Weekly (3)</div><div class="text-sm text-slate-500 italic">Seminggu sekali (3)</div></div></label></li>
+                            <li><label class="flex items-start cursor-pointer group rounded-lg p-2 hover:bg-slate-50 transition-colors"><input type="radio" name="audit_q3" value="4" onchange="calculateAuditScore()" class="radio-custom mt-0.5 mr-3" style="accent-color: #9333ea;"><div><div class="text-slate-800 font-medium">Daily or almost daily (4)</div><div class="text-sm text-slate-500 italic">Setiap hari atau hampir setiap hari (4)</div></div></label></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-purple-600 rounded-xl shadow-lg p-6 flex flex-col md:flex-row justify-between items-center text-white border border-purple-800 transform transition-all search-target mt-6">
+                <div class="mb-4 md:mb-0 w-full md:w-2/3">
+                    <h2 class="text-2xl font-bold flex items-center">
+                        <svg class="w-8 h-8 mr-3 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        AUDIT-C Total Score
+                    </h2>
+                    <h3 class="text-lg font-medium text-purple-200 italic mt-1">Jumlah Skor AUDIT-C</h3>
+                    <p class="text-sm text-purple-100 mt-2 bg-purple-700 bg-opacity-50 p-3 rounded border border-purple-500">
+                        <span class="block font-medium">Sum of Q1, Q2, and Q3. Total score ranges from 0-12.</span>
+                        <span class="block italic mt-1 text-purple-200">Hasil tambah S1, S2, dan S3. Jumlah skor dari 0-12.</span>
+                    </p>
+                </div>
+                <div class="w-full md:w-1/3 flex justify-end">
+                    <div class="bg-white rounded-lg p-4 shadow-inner flex items-center space-x-4 border-2 border-purple-300 w-full md:w-auto justify-center">
+                        <div class="text-center">
+                            <div class="text-slate-700 font-bold text-sm uppercase tracking-wider">Total Score</div>
+                            <div class="text-slate-400 font-medium text-xs italic mt-0.5">Jumlah Skor</div>
+                        </div>
+                        <input type="text" id="auditScoreResult" class="w-20 md:w-24 bg-slate-50 border border-slate-300 p-2 rounded text-purple-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none" value="0" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8 search-target">
+                <div class="border-b-2 border-slate-100 pb-4 mb-6">
+                    <h2 class="text-3xl font-extrabold text-slate-800">AUDIT-C Interpretation</h2>
+                    <h3 class="text-xl font-medium text-slate-500 italic mt-1">Tafsiran Skor AUDIT-C dan Tindakan Digalakkan</h3>
+                </div>
+
+                <div class="overflow-x-auto mb-4 shadow-sm rounded-lg border border-slate-200">
+                    <table class="w-full text-left border-collapse bg-white">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700">
+                                <th class="p-4 border-b border-r border-slate-200 w-1/5"><div class="font-bold text-lg">Score (Men)</div><div class="font-normal italic text-sm text-slate-500">Lelaki</div></th>
+                                <th class="p-4 border-b border-r border-slate-200 w-1/5"><div class="font-bold text-lg">Score (Women)</div><div class="font-normal italic text-sm text-slate-500">Wanita</div></th>
+                                <th class="p-4 border-b border-slate-200"><div class="font-bold text-lg">Indicated Response</div><div class="font-normal italic text-sm text-slate-500">Tindakan Digalakkan</div></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="hover:bg-green-50 transition-colors">
+                                <td class="p-4 border-r align-middle"><div class="font-extrabold text-2xl text-green-700">0 – 3</div></td>
+                                <td class="p-4 border-r align-middle"><div class="font-extrabold text-2xl text-green-700">0 – 2</div></td>
+                                <td class="p-4 align-top">
+                                    <div class="text-slate-800"><strong class="text-green-800">Low Risk:</strong> Brief education on safe drinking limits.</div>
+                                    <div class="text-slate-600 italic text-sm mt-2"><strong class="text-green-700">Risiko Rendah:</strong> Pendidikan ringkas tentang had minum yang selamat.</div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-red-50 transition-colors">
+                                <td class="p-4 border-r align-middle"><div class="font-extrabold text-2xl text-red-700">4 – 12</div></td>
+                                <td class="p-4 border-r align-middle"><div class="font-extrabold text-2xl text-red-700">3 – 12</div></td>
+                                <td class="p-4 align-top">
+                                    <div class="text-slate-800"><strong class="text-red-800">Positive Screen / High Risk:</strong> Further evaluation for alcohol use disorder; brief intervention.</div>
+                                    <div class="text-slate-600 italic text-sm mt-2"><strong class="text-red-700">Saringan Positif / Risiko Tinggi:</strong> Penilaian lanjut untuk kecelaruan penggunaan alkohol; intervensi ringkas.</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <p class="text-sm text-slate-500 italic mt-4 bg-slate-50 p-4 border border-slate-200 rounded-lg">
+                    <strong>Note:</strong> However, if the patient's score is derived purely from Question 1 (e.g., scoring a 4 but having 0s on Questions 2 and 3), the provider should assess if the patient is truly drinking hazardously. 
+                </p>
+            </div>
+            
+        </div>
+    </div> <div id="sectionLinks" class="hidden space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <a href="https://myramadan.web.app/" target="_blank" class="card block hover:shadow-lg transition-all transform hover:-translate-y-1 search-target group">
+                <div class="h-32 bg-gradient-to-r from-teal-500 to-emerald-600 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-white opacity-90 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">My Ramadan QR</h3>
+                    <p class="text-slate-600 text-sm">Access the official My Ramadan web application easily.</p>
+                    <div class="mt-4 flex items-center text-teal-600 font-semibold text-sm">
+                        Visit Site <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://drive.google.com/file/d/1CWWnbdJ7AC2tK2D3klPdbO5fYiSOtfx7/view?usp=sharing" target="_blank" class="card block hover:shadow-lg transition-all transform hover:-translate-y-1 search-target group">
+                <div class="h-32 bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-white opacity-90 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path></svg>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Mental Support Hub (QR Code)</h3>
+                    <p class="text-slate-600 text-sm">View or download the Mental Support Hub QR code flyer.</p>
+                    <div class="mt-4 flex items-center text-indigo-600 font-semibold text-sm">
+                        View QR Code <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://tinyurl.com/MentalSupportHub" target="_blank" class="card block hover:shadow-lg transition-all transform hover:-translate-y-1 search-target group">
+                <div class="h-32 bg-gradient-to-r from-violet-500 to-fuchsia-600 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-white opacity-90 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Mental Support Hub (Site)</h3>
+                    <p class="text-slate-600 text-sm">Direct link to the primary Mental Support Hub portal.</p>
+                    <div class="mt-4 flex items-center text-fuchsia-600 font-semibold text-sm">
+                        Visit Portal <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+
+    </div> <div id="noResults" class="hidden text-center py-12">
+        <svg class="mx-auto h-16 w-16 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h3 class="text-lg font-bold text-slate-700">No results found / Tiada hasil carian</h3>
+        <p class="text-slate-500 mt-1">Try adjusting your search terms.</p>
+    </div>
+
+</div>
+
+<script>
+    // -------------------------
+    // ASSIST SCORE CALCULATOR
+    // -------------------------
+    function calculateAssistScore() {
+        let total = 0;
+        const questions = ['assist_q2', 'assist_q3', 'assist_q4', 'assist_q5', 'assist_q6', 'assist_q7'];
+        
+        questions.forEach(q => {
+            const selectedRadio = document.querySelector(`input[name="${q}"]:checked`);
+            if (selectedRadio) total += parseInt(selectedRadio.value, 10);
+        });
+
+        const scoreInput = document.getElementById('assistScoreResult');
+        scoreInput.value = total;
+
+        // Visual feedback
+        if(total >= 27) {
+            scoreInput.className = "w-20 md:w-24 bg-red-100 border border-red-300 p-2 rounded text-red-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        } else if (total >= 4) {
+            scoreInput.className = "w-20 md:w-24 bg-yellow-100 border border-yellow-300 p-2 rounded text-yellow-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        } else {
+            scoreInput.className = "w-20 md:w-24 bg-green-100 border border-green-300 p-2 rounded text-green-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        }
+    }
+
+    // -------------------------
+    // AUDIT-C SCORE CALCULATOR
+    // -------------------------
+    function calculateAuditScore() {
+        let total = 0;
+        const questions = ['audit_q1', 'audit_q2', 'audit_q3'];
+        
+        questions.forEach(q => {
+            const selectedRadio = document.querySelector(`input[name="${q}"]:checked`);
+            if (selectedRadio) total += parseInt(selectedRadio.value, 10);
+        });
+
+        const scoreInput = document.getElementById('auditScoreResult');
+        scoreInput.value = total;
+
+        // Visual feedback (General positive cut-off at 3/4)
+        if(total >= 4) {
+            scoreInput.className = "w-20 md:w-24 bg-red-100 border border-red-300 p-2 rounded text-red-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        } else if (total === 3) {
+            scoreInput.className = "w-20 md:w-24 bg-orange-100 border border-orange-300 p-2 rounded text-orange-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        } else {
+            scoreInput.className = "w-20 md:w-24 bg-green-100 border border-green-300 p-2 rounded text-green-700 font-extrabold text-3xl md:text-4xl text-center shadow-inner focus:outline-none transition-colors duration-300";
+        }
+    }
+
+    // -------------------------
+    // TAB NAVIGATION LOGIC
+    // -------------------------
+    function switchMainTab(tab) {
+        // Reset Search when switching tabs
+        document.getElementById('searchInput').value = "";
+        performSearch();
+
+        const secTools = document.getElementById('sectionTools');
+        const secLinks = document.getElementById('sectionLinks');
+        const btnTools = document.getElementById('mainTab1');
+        const btnLinks = document.getElementById('mainTab2');
+
+        if(tab === 'tools') {
+            secTools.classList.remove('hidden');
+            secLinks.classList.add('hidden');
+            btnTools.classList.replace('tab-inactive', 'tab-active');
+            btnLinks.classList.replace('tab-active', 'tab-inactive');
+        } else {
+            secTools.classList.add('hidden');
+            secLinks.classList.remove('hidden');
+            btnLinks.classList.replace('tab-inactive', 'tab-active');
+            btnTools.classList.replace('tab-active', 'tab-inactive');
+        }
+    }
+
+    function switchTool(tool) {
+        // Reset Search when switching tools
+        document.getElementById('searchInput').value = "";
+        performSearch();
+
+        const viewAssist = document.getElementById('toolAssist');
+        const viewAuditC = document.getElementById('toolAuditC');
+        const pillAssist = document.getElementById('pillAssist');
+        const pillAuditC = document.getElementById('pillAuditC');
+
+        if(tool === 'assist') {
+            viewAssist.classList.remove('hidden');
+            viewAuditC.classList.add('hidden');
+            pillAssist.classList.replace('pill-inactive', 'pill-active');
+            pillAuditC.classList.replace('pill-active', 'pill-inactive');
+        } else {
+            viewAssist.classList.add('hidden');
+            viewAuditC.classList.remove('hidden');
+            pillAuditC.classList.replace('pill-inactive', 'pill-active');
+            pillAssist.classList.replace('pill-active', 'pill-inactive');
+        }
+    }
+
+    // -------------------------
+    // ENHANCED GLOBAL SEARCH
+    // -------------------------
+    function performSearch() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const targets = document.querySelectorAll('.search-target');
+        let visibleCount = 0;
+
+        targets.forEach(el => {
+            // Only search within the CURRENTLY VISIBLE main tab and tool tab
+            // E.g., if we are in ASSIST, don't show AUDIT-C cards, unless we force reveal them.
+            // For better UX, we only filter what is currently visible in the DOM hierarchy.
+            
+            // Check if element is currently supposed to be visible based on its parent containers
+            let isParentHidden = false;
+            let parent = el.parentElement;
+            while(parent && parent.id !== 'sectionTools' && parent.id !== 'sectionLinks') {
+                if (parent.classList.contains('hidden')) {
+                    isParentHidden = true;
+                    break;
+                }
+                parent = parent.parentElement;
+            }
+
+            if (!isParentHidden) {
+                const text = el.innerText.toLowerCase();
+                if(text.includes(query) || query === "") {
+                    el.style.display = '';
+                    visibleCount++;
+                } else {
+                    el.style.display = 'none';
+                }
+            } else {
+                // If the parent tab is hidden, reset inline display so it's normal when tab is opened
+                el.style.display = ''; 
+            }
+        });
+
+        // Toggle No Results Message
+        const noResultsEl = document.getElementById('noResults');
+        if (visibleCount === 0 && query !== "") {
+            noResultsEl.classList.remove('hidden');
+        } else {
+            noResultsEl.classList.add('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>
