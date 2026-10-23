@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengue CPG 2026 Toolkit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-active { color: #2563eb; border-bottom: 3px solid #2563eb; background-color: #eff6ff; }
+        .tab-inactive { color: #64748b; border-bottom: 3px solid transparent; }
+        .tab-inactive:hover { color: #334155; background-color: #f1f5f9; }
+
+        /* Custom Checkbox Active State */
+        .custom-checkbox input:checked + div {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked { right: 0; border-color: #a855f7; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #a855f7; }
+        .toggle-checkbox:checked + .toggle-label:after { transform: translateX(100%); border-color: white; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-5 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 flex items-center gap-3 tracking-tight">
+                    <i class="fa-solid fa-truck-medical text-rose-600"></i> Dengue CDS 2026
+                </h1>
+                <p class="text-sm text-slate-500 mt-1 font-medium">Malaysia CPG Management of Dengue in Adults (4th Edition)</p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-col md:flex-row border-b border-slate-200 mb-6 bg-white rounded-t-xl overflow-hidden shadow-sm">
+            <button onclick="switchTab('full')" id="tab-full" class="flex-1 py-4 px-2 text-sm font-bold tracking-wide transition-colors tab-active flex items-center justify-center gap-2">
+                <i class="fa-solid fa-stethoscope"></i> 1. Full Assessment
+            </button>
+            <button onclick="switchTab('quick')" id="tab-quick" class="flex-1 py-4 px-2 text-sm font-bold tracking-wide transition-colors tab-inactive flex items-center justify-center gap-2">
+                <i class="fa-solid fa-droplet text-blue-500"></i> 2. Quick Fluid Calc
+            </button>
+            <button onclick="switchTab('rdt')" id="tab-rdt" class="flex-1 py-4 px-2 text-sm font-bold tracking-wide transition-colors tab-inactive flex items-center justify-center gap-2">
+                <i class="fa-solid fa-vial-virus text-purple-500"></i> 3. RDT Interpreter
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: FULL CLINICAL ASSESSMENT            -->
+        <!-- ========================================== -->
+        <div id="view-full" class="animate-fade-in flex flex-col lg:flex-row gap-6">
+            <!-- LEFT PANEL -->
+            <div class="w-full lg:w-7/12 space-y-5">
+                
+                <!-- Demographics -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-injured text-blue-500"></i> Demographics
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Age (Yrs)</label>
+                            <input type="number" id="f-age" min="0" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 45">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Gender</label>
+                            <select id="f-gender" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Weight (kg) <span class="text-rose-500">*</span></label>
+                            <input type="number" id="f-weight" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Height (cm)</label>
+                            <input type="number" id="f-height" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="170">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hemodynamics -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-rose-500"></i> Hemodynamics & Shock
+                    </h2>
+                    <div class="flex flex-col sm:flex-row gap-6 mb-4">
+                        <div class="flex gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">SBP</label>
+                                <input type="number" id="f-sbp" class="w-20 rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-rose-500 outline-none text-center font-bold" placeholder="110">
+                            </div>
+                            <div class="flex items-end pb-2 text-slate-400 text-lg">/</div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">DBP</label>
+                                <input type="number" id="f-dbp" class="w-20 rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-rose-500 outline-none text-center font-bold" placeholder="70">
+                            </div>
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 flex-1 sm:flex-none">
+                                <span class="block text-[10px] uppercase font-bold text-slate-500">Pulse Pressure</span>
+                                <span id="f-out-pp" class="font-bold text-slate-800 text-lg">--</span>
+                            </div>
+                            <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 flex-1 sm:flex-none">
+                                <span class="block text-[10px] uppercase font-bold text-slate-500">MAP</span>
+                                <span id="f-out-map" class="font-bold text-slate-800 text-lg">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">Signs of Reduced Perfusion</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50 transition has-[:checked]:bg-rose-50 has-[:checked]:border-rose-500">
+                            <input type="checkbox" id="f-shock-crt" class="w-4 h-4 text-rose-600 rounded focus:ring-rose-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">CRT > 3s</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50 transition has-[:checked]:bg-rose-50 has-[:checked]:border-rose-500">
+                            <input type="checkbox" id="f-shock-cold" class="w-4 h-4 text-rose-600 rounded focus:ring-rose-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">Cold Peripheries</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50 transition has-[:checked]:bg-rose-50 has-[:checked]:border-rose-500">
+                            <input type="checkbox" id="f-shock-tachy" class="w-4 h-4 text-rose-600 rounded focus:ring-rose-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">Tachycardia</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Warning Signs -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Warning Signs
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="warning-signs-container">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Special Populations -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-teal-500"></i> Special Populations
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-50 has-[:checked]:border-teal-500">
+                            <input type="checkbox" id="f-pop-preg" class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">Pregnancy</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-50 has-[:checked]:border-teal-500">
+                            <input type="checkbox" id="f-pop-dm" class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">Diabetes Mellitus</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-50 has-[:checked]:border-teal-500">
+                            <input type="checkbox" id="f-pop-geri" class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
+                            <span class="ml-2 text-sm font-semibold text-slate-700">Geriatric (>65)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: FULL RESULTS -->
+            <div class="w-full lg:w-5/12">
+                <div class="sticky top-6 flex flex-col gap-4">
+                    <div id="f-result-card" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 flex flex-col hidden animate-fade-in">
+                        <div id="f-res-header" class="p-5 text-white transition-colors duration-300">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div id="f-res-group" class="text-xs font-bold opacity-90 uppercase tracking-widest mb-1">GROUP A</div>
+                                    <h2 id="f-res-title" class="text-2xl font-black leading-tight">Outpatient Care</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-5">
+                            <div>
+                                <h3 class="text-xs font-bold uppercase text-slate-400 mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-droplet text-blue-500"></i> Management Plan
+                                </h3>
+                                <div id="f-res-action-box" class="p-4 rounded-xl">
+                                    <div id="f-res-action-title" class="text-lg font-bold text-slate-800 leading-tight"></div>
+                                    <div id="f-res-action-desc" class="text-sm text-slate-600 mt-2 font-medium"></div>
+                                </div>
+                            </div>
+
+                            <!-- Special Populations Output -->
+                            <div id="f-special-container" class="hidden">
+                                <h3 class="text-xs font-bold uppercase text-slate-400 mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-star-of-life text-teal-500"></i> Special Considerations
+                                </h3>
+                                <div id="f-res-special" class="text-sm font-medium text-slate-700 space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State -->
+                    <div id="f-empty-state" class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 text-center min-h-[300px]">
+                        <i class="fa-solid fa-clipboard-list text-4xl mb-4 text-slate-300"></i>
+                        <p class="text-sm font-medium">Enter patient weight and clinical signs to generate assessment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: QUICK FLUID CALCULATOR              -->
+        <!-- ========================================== -->
+        <div id="view-quick" class="animate-fade-in hidden flex flex-col gap-6">
+            
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start gap-4">
+                <i class="fa-solid fa-circle-info text-blue-500 text-xl mt-0.5"></i>
+                <div>
+                    <h3 class="text-blue-800 font-bold text-sm">Quick Fluid Calculator</h3>
+                    <p class="text-blue-700 text-sm mt-1">For fast bedside fluid calculation in diagnosed patients. Handles Weight limits and IBW/ABW adjustments automatically.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Inputs -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">Patient Parameters</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Gender</label>
+                                <select id="q-gender" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Weight (kg) <span class="text-rose-500">*</span></label>
+                                <input type="number" id="q-weight" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 70">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Height (cm) <span class="text-slate-400 font-normal">(Optional)</span></label>
+                                <input type="number" id="q-height" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 170">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Status Selector -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">Select Scenario</h2>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer bg-white hover:bg-amber-50 transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:ring-1 has-[:checked]:ring-amber-500">
+                                <input type="radio" name="q-status" value="dwws" class="w-4 h-4 text-amber-600 focus:ring-amber-500" checked>
+                                <span class="ml-3 text-sm font-bold text-slate-700">Warning Signs (No Shock)</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer bg-white hover:bg-rose-50 transition has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50 has-[:checked]:ring-1 has-[:checked]:ring-rose-500">
+                                <input type="radio" name="q-status" value="comp" class="w-4 h-4 text-rose-600 focus:ring-rose-500">
+                                <span class="ml-3 text-sm font-bold text-slate-700">Compensated Shock</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer bg-white hover:bg-red-50 transition has-[:checked]:border-red-500 has-[:checked]:bg-red-50 has-[:checked]:ring-1 has-[:checked]:ring-red-500">
+                                <input type="radio" name="q-status" value="decomp" class="w-4 h-4 text-red-600 focus:ring-red-500">
+                                <span class="ml-3 text-sm font-bold text-slate-700">Decompensated Shock</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Weight Analysis Card -->
+                    <div id="q-weight-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hidden">
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 border-b border-slate-100 pb-2">Weight Analysis</h2>
+                        
+                        <!-- Missing Height Warning -->
+                        <div id="q-height-warning" class="hidden mb-4 bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-start gap-3 text-amber-800">
+                            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
+                            <div class="text-xs">
+                                <b>Height omitted.</b> Using actual weight. Fluid volumes may be overestimated in obese patients.
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-medium">Actual Weight</span>
+                                <span id="q-out-act" class="font-bold text-slate-800">-- kg</span>
+                            </div>
+                            <div id="q-bmi-row" class="flex justify-between">
+                                <span class="text-slate-500 font-medium">BMI</span>
+                                <span id="q-out-bmi" class="font-bold text-slate-800">--</span>
+                            </div>
+                            <div id="q-ibw-row" class="flex justify-between">
+                                <span class="text-slate-500 font-medium">Ideal Body Wt (IBW)</span>
+                                <span id="q-out-ibw" class="font-bold text-slate-800">-- kg</span>
+                            </div>
+                            <div id="q-abw-row" class="flex justify-between hidden">
+                                <span class="text-slate-500 font-medium">Adj Body Wt (ABW)</span>
+                                <span id="q-out-abw" class="font-bold text-slate-800">-- kg</span>
+                            </div>
+                            
+                            <!-- Visual Cues / Warnings -->
+                            <div id="q-warn-obese" class="hidden mt-2 bg-blue-50 text-blue-800 border border-blue-200 p-2 rounded text-xs font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info"></i> Obese (BMI &ge; 27.5). ABW applied.
+                            </div>
+
+                            <div class="pt-3 mt-3 border-t border-slate-200 flex justify-between items-end">
+                                <div>
+                                    <span class="block text-xs font-bold text-blue-500 uppercase tracking-wide">Final Dosing Wt</span>
+                                    <div id="q-warn-cap" class="hidden mt-1 text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 inline-block">
+                                        Capped at 70kg Max
+                                    </div>
+                                </div>
+                                <span id="q-out-dosing" class="text-2xl font-black text-blue-700">-- kg</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outputs -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <div id="q-empty-state" class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl h-full flex flex-col items-center justify-center text-slate-400 p-10 min-h-[300px]">
+                        <i class="fa-solid fa-weight-scale text-4xl mb-4 text-slate-300"></i>
+                        <p class="font-medium">Enter patient weight to generate fluid protocols.</p>
+                    </div>
+
+                    <div id="q-fluid-card" class="hidden space-y-6 animate-fade-in">
+                        <!-- Quota Dashboard (Injected via JS) -->
+                        <div id="q-quota-container"></div>
+
+                        <!-- Tapering/Resuscitation Timeline -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center">
+                                    <i class="fa-solid fa-timeline text-indigo-500 mr-2"></i> Resuscitation Timeline
+                                </h2>
+                            </div>
+                            <div class="p-6" id="q-timeline-content">
+                                <!-- Dynamic Steps Injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: RDT INTERPRETER (TABLE 5)           -->
+        <!-- ========================================== -->
+        <div id="view-rdt" class="animate-fade-in hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                    
+                    <!-- RDT Inputs -->
+                    <div class="w-full md:w-5/12 p-6 bg-slate-50 border-r border-slate-200">
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-vial text-purple-600"></i> Patient Test Details
+                        </h2>
+
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Clinical History</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer bg-white hover:border-purple-300 transition has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 has-[:checked]:ring-1 has-[:checked]:ring-purple-500">
+                                        <input type="radio" name="rdt-hist" value="less5" class="w-4 h-4 text-purple-600 focus:ring-purple-500" checked>
+                                        <span class="ml-3 text-sm font-semibold text-slate-700">History of fever < 5 days</span>
+                                    </label>
+                                    <label class="flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer bg-white hover:border-purple-300 transition has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 has-[:checked]:ring-1 has-[:checked]:ring-purple-500">
+                                        <input type="radio" name="rdt-hist" value="more5" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-3 text-sm font-semibold text-slate-700">History of fever > 5 days</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Test Results (RDT Combo)</label>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <span class="text-sm font-bold text-slate-700">NS1 Antigen</span>
+                                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" id="rdt-ns1" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out"/>
+                                            <label for="rdt-ns1" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-200 ease-in-out"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <span class="text-sm font-bold text-slate-700">IgM Antibody</span>
+                                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" id="rdt-igm" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out"/>
+                                            <label for="rdt-igm" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-200 ease-in-out"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <span class="text-sm font-bold text-slate-700">IgG Antibody</span>
+                                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" id="rdt-igg" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out"/>
+                                            <label for="rdt-igg" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-200 ease-in-out"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RDT Output -->
+                    <div class="w-full md:w-7/12 p-8 flex flex-col justify-center relative bg-white">
+                        <div class="absolute top-4 right-4 text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">Ref: CPG 2026 Table 5</div>
+                        
+                        <div class="text-center mb-6">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Interpretation</h3>
+                            <div class="text-slate-800 font-medium">Based on selected parameters</div>
+                        </div>
+
+                        <div id="rdt-result-card" class="p-8 rounded-2xl border-2 text-center transition-all duration-300 shadow-sm bg-slate-50 border-slate-200 text-slate-500">
+                            <i id="rdt-result-icon" class="fa-solid fa-circle-info text-slate-400 text-5xl mb-4"></i>
+                            <h2 id="rdt-result-text" class="text-xl md:text-2xl font-black leading-tight">Select test results to interpret</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data structure for Warning Signs 2026
+        const warningSignsList = [
+            { id: 'ws1', label: 'Lack of clinical improvement / worsening when fever subsides' },
+            { id: 'ws2', label: 'Intense abdominal pain or tenderness' },
+            { id: 'ws3', label: 'Persistent vomiting (>3x/day)' },
+            { id: 'ws4', label: 'Lethargy, restlessness, irritability or confusion' },
+            { id: 'ws5', label: 'Fluid accumulation' },
+            { id: 'ws6', label: 'Postural hypotension' },
+            { id: 'ws7', label: 'Liver enlargement >2cm' },
+            { id: 'ws8', label: 'Reduced or absent urine output (4-6 hours)' },
+            { id: 'ws9', label: 'Bleeding manifestation' },
+            { id: 'ws10', label: 'Rising HCT + rapid platelet drop' }
+        ];
+
+        // Init Warning Signs in Full Assessment
+        const wsContainer = document.getElementById('warning-signs-container');
+        warningSignsList.forEach(ws => {
+            const lbl = document.createElement('label');
+            lbl.className = "flex items-start p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-amber-50 transition has-[:checked]:bg-amber-50 has-[:checked]:border-amber-400";
+            lbl.innerHTML = `
+                <input type="checkbox" id="f-${ws.id}" class="ws-checkbox mt-0.5 w-4 h-4 text-amber-500 rounded focus:ring-amber-500">
+                <span class="ml-2.5 text-xs font-semibold text-slate-700 leading-snug">${ws.label}</span>
+            `;
+            wsContainer.appendChild(lbl);
+        });
+
+        // Tab Management
+        function switchTab(tab) {
+            const views = { full: 'view-full', quick: 'view-quick', rdt: 'view-rdt' };
+            const tabs = { full: 'tab-full', quick: 'tab-quick', rdt: 'tab-rdt' };
+            
+            for (const key in views) {
+                document.getElementById(views[key]).classList.add('hidden');
+                document.getElementById(tabs[key]).className = "flex-1 py-4 px-2 text-sm font-bold tracking-wide transition-colors tab-inactive flex items-center justify-center gap-2";
+            }
+            
+            document.getElementById(views[tab]).classList.remove('hidden');
+            document.getElementById(tabs[tab]).className = "flex-1 py-4 px-2 text-sm font-bold tracking-wide transition-colors tab-active flex items-center justify-center gap-2";
+
+            if (tab === 'full') calculateFull();
+            if (tab === 'quick') calculateQuick();
+            if (tab === 'rdt') calculateRDT();
+        }
+
+        // --- Core Calculators ---
+        function getWeightStats(weight, height, gender) {
+            if (!weight || isNaN(weight)) return null;
+            let bmi = 0, ibw = 0, abw = 0, isObese = false;
+            let dosingWeight = weight;
+
+            if (height > 0 && !isNaN(height)) {
+                bmi = weight / Math.pow(height / 100, 2);
+                ibw = gender === 'male' ? 50.0 + 0.91 * (height - 152.4) : 45.5 + 0.91 * (height - 152.4);
+                if (weight > ibw) abw = ibw + 0.4 * (weight - ibw);
+                if (bmi >= 27.5) {
+                    isObese = true;
+                    if (abw > 0) dosingWeight = abw;
+                }
+            }
+            
+            let isCapped = dosingWeight > 70;
+            let cappedWeight = Math.min(dosingWeight, 70);
+
+            return { bmi, ibw, abw, isObese, dosingWeight, isCapped, cappedWeight, hasHeight: height > 0 };
+        }
+
+        function getFluidStats(cappedWeight) {
+            let maint_hr = 0;
+            if (cappedWeight <= 10) maint_hr = cappedWeight * 4;
+            else if (cappedWeight <= 20) maint_hr = 40 + ((cappedWeight - 10) * 2);
+            else maint_hr = 60 + ((cappedWeight - 20) * 1);
+
+            let maint24 = maint_hr * 24;
+            let deficit = 50 * cappedWeight;
+            let quota = maint24 + deficit; // Wait, formula is Maintenance + 5% deficit for the entire 48h? Yes: Maint24 + Deficit.
+
+            return {
+                maint_hr, maint24, deficit, quota,
+                r7: 7 * cappedWeight,
+                r5: 5 * cappedWeight,
+                r3: 3 * cappedWeight,
+                r2: 2 * cappedWeight
+            };
+        }
+
+        // --- Full Assessment Logic ---
+        document.querySelectorAll('#view-full input, #view-full select').forEach(el => {
+            el.addEventListener('input', calculateFull);
+            el.addEventListener('change', calculateFull);
+        });
+
+        // Auto-check Geriatric if age > 65
+        document.getElementById('f-age').addEventListener('input', (e) => {
+            const age = parseInt(e.target.value);
+            const geriBox = document.getElementById('f-pop-geri');
+            if (age > 65) geriBox.checked = true;
+            else if (age <= 65) geriBox.checked = false;
+            calculateFull();
+        });
+
+        function calculateFull() {
+            const w = parseFloat(document.getElementById('f-weight').value);
+            const h = parseFloat(document.getElementById('f-height').value);
+            const g = document.getElementById('f-gender').value;
+
+            const empty = document.getElementById('f-empty-state');
+            const resCard = document.getElementById('f-result-card');
+
+            if (!w || isNaN(w)) {
+                empty.classList.remove('hidden');
+                resCard.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            resCard.classList.remove('hidden');
+
+            const ws = getWeightStats(w, h, g);
+            const fs = getFluidStats(ws.cappedWeight);
+
+            // Hemodynamics
+            const sbp = parseFloat(document.getElementById('f-sbp').value) || 0;
+            const dbp = parseFloat(document.getElementById('f-dbp').value) || 0;
+            let pp = 0, map = 0;
+            if (sbp && dbp) {
+                pp = sbp - dbp;
+                map = (sbp + 2 * dbp) / 3;
+                document.getElementById('f-out-pp').innerText = `${pp} mmHg`;
+                document.getElementById('f-out-map').innerText = `${Math.round(map)} mmHg`;
+                
+                if (pp <= 20) document.getElementById('f-out-pp').className = "font-bold text-rose-600 text-lg";
+                else document.getElementById('f-out-pp').className = "font-bold text-slate-800 text-lg";
+            } else {
+                document.getElementById('f-out-pp').innerText = `-- mmHg`;
+                document.getElementById('f-out-map').innerText = `-- mmHg`;
+            }
+
+            const shockSigns = document.getElementById('f-shock-crt').checked || 
+                               document.getElementById('f-shock-cold').checked || 
+                               document.getElementById('f-shock-tachy').checked;
+
+            let isDecompensated = false;
+            let isCompensated = false;
+
+            if ((sbp > 0 && sbp < 90) || (pp > 0 && pp <= 20)) {
+                isDecompensated = true;
+            } else if ((pp > 20 && pp <= 30) || (shockSigns && sbp >= 90)) {
+                isCompensated = true;
+            }
+
+            // Warning Signs
+            let hasWarning = false;
+            document.querySelectorAll('#view-full .ws-checkbox').forEach(box => { if (box.checked) hasWarning = true; });
+
+            // Special Pops
+            const isPreg = document.getElementById('f-pop-preg').checked;
+            const isDM = document.getElementById('f-pop-dm').checked;
+            const isGeri = document.getElementById('f-pop-geri').checked;
+            const hasSpecial = isPreg || isDM || isGeri;
+
+            // Output Rendering
+            const specCont = document.getElementById('f-special-container');
+            const specBody = document.getElementById('f-res-special');
+            specBody.innerHTML = "";
+            if (hasSpecial) {
+                specCont.classList.remove('hidden');
+                if (isPreg) specBody.innerHTML += `<div class='bg-teal-50 p-2 rounded border border-teal-100'>🤰 <b>Pregnancy:</b> Admit confirmed. Vaginal delivery preferred. Avoid IM injections & prophylactic platelets.</div>`;
+                if (isDM) specBody.innerHTML += `<div class='bg-teal-50 p-2 rounded border border-teal-100'>🩸 <b>Diabetes:</b> Stop oral hypoglycaemic agents; consider insulin. Differentiate dengue shock from DKA/HHS.</div>`;
+                if (isGeri) specBody.innerHTML += `<div class='bg-teal-50 p-2 rounded border border-teal-100'>👴 <b>Geriatric (>65):</b> High risk fluid overload. Atypical presentation common. Leucopenia is an early reliable marker.</div>`;
+            } else {
+                specCont.classList.add('hidden');
+            }
+
+            const rHead = document.getElementById('f-res-header');
+            const rGroup = document.getElementById('f-res-group');
+            const rTitle = document.getElementById('f-res-title');
+            const rActBox = document.getElementById('f-res-action-box');
+            const rActTitle = document.getElementById('f-res-action-title');
+            const rActDesc = document.getElementById('f-res-action-desc');
+
+            if (isDecompensated) {
+                rHead.className = "p-5 text-white bg-rose-600 transition-colors duration-300";
+                rGroup.innerText = "GROUP C (ICU / RED ZONE)";
+                rTitle.innerText = "Decompensated Shock";
+                rActBox.className = "bg-rose-50 border border-rose-200 p-4 rounded-xl";
+                rActTitle.innerHTML = `<span class='text-rose-700'>Immediate Resuscitation</span><br><span class='text-3xl font-black text-rose-600'>${Math.round(20 * ws.cappedWeight)} ml</span> <span class='text-sm font-medium text-rose-800'>Crystalloid IV Bolus</span>`;
+                rActDesc.innerHTML = `<ul class="list-disc ml-4 space-y-1 mt-2 text-rose-900">
+                    <li>Run over <b>15 - 30 minutes</b>.</li>
+                    <li>Check baseline HCT, RP, LFT, Lactate, GXM.</li>
+                    <li>If HCT falls + unstable, suspect <b>occult bleeding</b> -> Transfuse packed red cells.</li>
+                </ul>`;
+            } else if (isCompensated) {
+                rHead.className = "p-5 text-white bg-rose-500 transition-colors duration-300";
+                rGroup.innerText = "GROUP C (EMERGENCY / RED ZONE)";
+                rTitle.innerText = "Compensated Shock";
+                rActBox.className = "bg-rose-50 border border-rose-200 p-4 rounded-xl";
+                rActTitle.innerHTML = `<span class='text-rose-700'>Urgent Resuscitation</span><br><span class='text-3xl font-black text-rose-600'>${Math.round(10 * ws.cappedWeight)} ml</span> <span class='text-sm font-medium text-rose-800'>Crystalloid IV Bolus</span>`;
+                rActDesc.innerHTML = `<ul class="list-disc ml-4 space-y-1 mt-2 text-rose-900">
+                    <li>Run over <b>1 hour</b>.</li>
+                    <li>If improved, taper to 5-7 ml/kg/hr for 1-2 hours.</li>
+                    <li>Consider PoCUS for fluid responsiveness.</li>
+                </ul>`;
+            } else if (hasWarning) {
+                rHead.className = "p-5 text-white bg-amber-500 transition-colors duration-300";
+                rGroup.innerText = "GROUP B2 (ADMIT / YELLOW ZONE)";
+                rTitle.innerText = "Warning Signs (Critical Phase)";
+                rActBox.className = "bg-amber-50 border border-amber-200 p-4 rounded-xl";
+                rActTitle.innerHTML = `<span class='text-amber-800'>Phase-Specific Fluid Plan</span>`;
+                rActDesc.innerHTML = `
+                    <div class="mt-3 space-y-3">
+                        <div class="bg-white p-3 rounded border border-amber-200 text-center shadow-sm">
+                            <div class="text-[10px] uppercase font-bold text-amber-500">48-Hour Fluid Quota (Max)</div>
+                            <div class="text-2xl font-black text-amber-700">${Math.round(fs.quota)} ml</div>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-amber-200 shadow-sm">
+                            <div class="font-bold text-amber-900 mb-1">Initial IV Rate: <span class="text-lg">${Math.round(fs.r3)} - ${Math.round(fs.r5)} ml/hr</span></div>
+                            <div class="text-xs text-amber-800">
+                                Run IV Crystalloid at 3-5 ml/kg/hr for 1-2 hours. <br>
+                                Taper to 2-3 ml/kg/hr gradually. Total given (Oral+IV) must stay within quota.
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (hasSpecial) {
+                rHead.className = "p-5 text-white bg-blue-500 transition-colors duration-300";
+                rGroup.innerText = "GROUP B1 (OBSERVE / ADMIT)";
+                rTitle.innerText = "High Risk / Comorbidity";
+                rActBox.className = "bg-blue-50 border border-blue-200 p-4 rounded-xl";
+                rActTitle.innerHTML = `<span class='text-blue-800'>Observe / Admit</span>`;
+                rActDesc.innerHTML = `<ul class="list-disc ml-4 space-y-1 mt-2 text-blue-900">
+                    <li>Encourage oral fluids (~200 ml/hr while awake).</li>
+                    <li>Manage underlying conditions. Monitor for warning signs.</li>
+                </ul>`;
+            } else {
+                rHead.className = "p-5 text-white bg-emerald-500 transition-colors duration-300";
+                rGroup.innerText = "GROUP A (OUTPATIENT / GREEN ZONE)";
+                rTitle.innerText = "Stable Dengue";
+                rActBox.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-xl";
+                rActTitle.innerHTML = `<span class='text-emerald-800'>Home Care</span>`;
+                rActDesc.innerHTML = `<ul class="list-disc ml-4 space-y-2 mt-2 text-emerald-900">
+                    <li><b>Hydration:</b> Advise ~200 ml/hr ORS/Isotonic while awake.</li>
+                    <li><b>Urine:</b> Void 4-6 times/day.</li>
+                    <li><b>Fever:</b> Paracetamol max 4g/day. AVOID NSAIDs.</li>
+                    <li>Daily clinical & FBC follow-up.</li>
+                </ul>`;
+            }
+        }
+
+        // --- Quick Fluid Calculator Logic ---
+        document.querySelectorAll('#view-quick input, #view-quick select').forEach(el => {
+            el.addEventListener('input', calculateQuick);
+            el.addEventListener('change', calculateQuick);
+        });
+
+        function calculateQuick() {
+            const w = parseFloat(document.getElementById('q-weight').value);
+            const h = parseFloat(document.getElementById('q-height').value);
+            const g = document.getElementById('q-gender').value;
+            const statusNode = document.querySelector('input[name="q-status"]:checked');
+            if(!statusNode) return;
+            const status = statusNode.value;
+
+            const wCard = document.getElementById('q-weight-card');
+            const empty = document.getElementById('q-empty-state');
+            const fCard = document.getElementById('q-fluid-card');
+            const warnHeight = document.getElementById('q-height-warning');
+
+            if (!w || isNaN(w)) {
+                wCard.classList.add('hidden'); fCard.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden'); wCard.classList.remove('hidden'); fCard.classList.remove('hidden');
+
+            let ws = getWeightStats(w, h, g);
+
+            if (!ws.hasHeight) {
+                warnHeight.classList.remove('hidden');
+                document.getElementById('q-bmi-row').classList.add('hidden');
+                document.getElementById('q-ibw-row').classList.add('hidden');
+                document.getElementById('q-abw-row').classList.add('hidden');
+                document.getElementById('q-warn-obese').classList.add('hidden');
+            } else {
+                warnHeight.classList.add('hidden');
+                document.getElementById('q-bmi-row').classList.remove('hidden');
+                document.getElementById('q-ibw-row').classList.remove('hidden');
+                
+                document.getElementById('q-out-bmi').innerText = ws.bmi.toFixed(1);
+                document.getElementById('q-out-ibw').innerText = `${ws.ibw.toFixed(1)} kg`;
+                
+                if (ws.abw > 0 && w > ws.ibw) {
+                    document.getElementById('q-abw-row').classList.remove('hidden');
+                    document.getElementById('q-out-abw').innerText = `${ws.abw.toFixed(1)} kg`;
+                } else {
+                    document.getElementById('q-abw-row').classList.add('hidden');
+                }
+                
+                const warnObese = document.getElementById('q-warn-obese');
+                if (ws.isObese) warnObese.classList.remove('hidden');
+                else warnObese.classList.add('hidden');
+            }
+
+            document.getElementById('q-out-act').innerText = `${w} kg`;
+            document.getElementById('q-out-dosing').innerText = `${ws.dosingWeight.toFixed(1)} kg`;
+            
+            const warnCap = document.getElementById('q-warn-cap');
+            if (ws.isCapped) warnCap.classList.remove('hidden');
+            else warnCap.classList.add('hidden');
+
+            const fs = getFluidStats(ws.cappedWeight);
+            const cWt = ws.cappedWeight;
+            
+            const quotaContainer = document.getElementById('q-quota-container');
+            const timelineContent = document.getElementById('q-timeline-content');
+
+            if (status === 'dwws') {
+                quotaContainer.innerHTML = `
+                    <div class="bg-slate-800 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                        <i class="fa-solid fa-droplet text-9xl absolute -bottom-6 -right-4 text-white opacity-5"></i>
+                        <h2 class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">Group B2 Fluid Management</h2>
+                        <h3 class="text-xl font-bold mb-6 text-white">48-Hour Fluid Quota Limit</h3>
+                        
+                        <div class="flex items-center gap-6">
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wide text-slate-400 font-bold mb-1">Total Limit (Oral + IV)</div>
+                                <div class="text-5xl font-black text-amber-400">${Math.round(fs.quota)} ml</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50 text-sm text-slate-300 font-medium flex justify-between items-center">
+                            <div>
+                                <span class="text-slate-400 text-xs uppercase tracking-wide block mb-1">Formula Calculation</span>
+                                Maint 24h + 5% Deficit (50ml/kg)
+                            </div>
+                            <div class="text-right font-mono">
+                                <span class="text-emerald-400">${Math.round(fs.maint24)}</span> <span class="text-slate-500">+</span> <span class="text-amber-400">${Math.round(fs.deficit)}</span>
+                            </div>
+                        </div>
+                    </div>`;
+
+                timelineContent.innerHTML = `
+                    <ul class="relative border-l border-slate-200 ml-3 space-y-6">
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-amber-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Start IV Crystalloid</h3>
+                            <div class="mt-2 bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-amber-800">3 - 5 ml/kg/hr</span>
+                                <span class="text-xl font-black text-amber-600">${Math.round(fs.r3)} - ${Math.round(fs.r5)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>1 hour</b>. Assess clinical response (CCTVR, Vitals, Urine Output).</p>
+                        </li>
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-blue-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">If Improving, Reduce Rate</h3>
+                            <div class="mt-2 bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-blue-800">2 - 3 ml/kg/hr</span>
+                                <span class="text-xl font-black text-blue-600">${Math.round(fs.r2)} - ${Math.round(fs.r3)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>1 - 2 hours</b>, then gradually reduce to maintenance or stop if tolerating oral fluids.</p>
+                        </li>
+                    </ul>`;
+            } else if (status === 'comp') {
+                quotaContainer.innerHTML = `
+                    <div class="bg-rose-100 border border-rose-300 rounded-xl p-4 flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-xl mt-0.5"></i>
+                        <div>
+                            <h3 class="font-bold text-rose-800 text-sm">WARNING: SHOCK PROTOCOL ACTIVE</h3>
+                            <p class="text-rose-700 text-sm mt-1">The 48-hour Fluid Quota is <b>NO LONGER APPLICABLE</b> in shock. Resuscitate immediately following the timeline below.</p>
+                        </div>
+                    </div>`;
+                    
+                timelineContent.innerHTML = `
+                    <ul class="relative border-l border-slate-200 ml-3 space-y-6">
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-rose-600 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 1: Initial Resuscitation</h3>
+                            <div class="mt-2 bg-rose-50 border border-rose-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-rose-800">10 ml/kg/hr</span>
+                                <span class="text-xl font-black text-rose-600">${Math.round(cWt * 10)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>1 hour</b>. Obtain FBC, RP, LFT, Lactate, GXM before fluids.</p>
+                        </li>
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-orange-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 2: If Improving</h3>
+                            <div class="mt-2 bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-orange-800">5 - 7 ml/kg/hr</span>
+                                <span class="text-xl font-black text-orange-600">${Math.round(fs.r5)} - ${Math.round(fs.r7)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>1 - 2 hours</b>. Continue gradual reduction based on clinical assessment.</p>
+                        </li>
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-amber-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 3: Further Tapering</h3>
+                            <div class="mt-2 bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-amber-800">3 - 5 ml/kg/hr</span>
+                                <span class="text-xl font-black text-amber-600">${Math.round(fs.r3)} - ${Math.round(fs.r5)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>2 - 4 hours</b>, then reduce to 2-3 ml/kg/hr for another 2-4 hours.</p>
+                        </li>
+                    </ul>`;
+            } else if (status === 'decomp') {
+                quotaContainer.innerHTML = `
+                    <div class="bg-red-100 border border-red-300 rounded-xl p-4 flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl mt-0.5"></i>
+                        <div>
+                            <h3 class="font-bold text-red-800 text-sm">CRITICAL WARNING: DECOMPENSATED SHOCK</h3>
+                            <p class="text-red-700 text-sm mt-1">The 48-hour Fluid Quota is <b>NO LONGER APPLICABLE</b>. Resuscitate immediately. DO NOT DELAY.</p>
+                        </div>
+                    </div>`;
+
+                timelineContent.innerHTML = `
+                    <ul class="relative border-l border-slate-200 ml-3 space-y-6">
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-red-600 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 1: Immediate Bolus</h3>
+                            <div class="mt-2 bg-red-50 border border-red-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-red-800">20 ml/kg</span>
+                                <span class="text-2xl font-black text-red-600">${Math.round(cWt * 20)} ml</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Give as fast bolus over <b>15 - 30 minutes</b>. Obtain baseline labs immediately.</p>
+                        </li>
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-rose-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 2: If Improving</h3>
+                            <div class="mt-2 bg-rose-50 border border-rose-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-rose-800">10 ml/kg/hr</span>
+                                <span class="text-xl font-black text-rose-600">${Math.round(cWt * 10)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>1 hour</b>.</p>
+                        </li>
+                        <li class="pl-6">
+                            <span class="absolute -left-1.5 flex h-3 w-3 rounded-full bg-orange-500 ring-4 ring-white"></span>
+                            <h3 class="font-bold text-slate-800 text-lg">Step 3: Tapering Schedule</h3>
+                            <div class="mt-2 bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center justify-between">
+                                <span class="font-bold text-orange-800">5 - 7 ml/kg/hr</span>
+                                <span class="text-xl font-black text-orange-600">${Math.round(fs.r5)} - ${Math.round(fs.r7)} ml/hr</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Run for <b>2 - 4 hours</b>, then reduce to 3-5 ml/kg/hr, and then 2-3 ml/kg/hr.</p>
+                        </li>
+                    </ul>`;
+            }
+        }
+
+        // --- TAB 3: RDT Interpreter Logic ---
+        document.querySelectorAll('#view-rdt input').forEach(el => {
+            el.addEventListener('change', calculateRDT);
+        });
+
+        function calculateRDT() {
+            const histNode = document.querySelector('input[name="rdt-hist"]:checked');
+            if(!histNode) return;
+            const hist = histNode.value;
+            const ns1 = document.getElementById('rdt-ns1').checked;
+            const igm = document.getElementById('rdt-igm').checked;
+            const igg = document.getElementById('rdt-igg').checked;
+            
+            const key = `${ns1 ? '+' : '-'}${igm ? '+' : '-'}${igg ? '+' : '-'}`;
+            let text = "Select test results to interpret";
+            let style = "bg-slate-50 border-slate-200 text-slate-500";
+            let icon = "fa-circle-info text-slate-400";
+
+            if (key !== '---') { // Only show detailed result if at least one is positive or explicitly '---' selected
+                if (hist === 'less5') {
+                    if (key === '+--' || key === '++-') {
+                        text = "Acute dengue infection"; style = "bg-rose-50 border-rose-200 text-rose-800"; icon = "fa-virus text-rose-500";
+                    } else if (key === '+-+' || key === '+++') {
+                        text = "Acute dengue infection or secondary infection"; style = "bg-amber-50 border-amber-200 text-amber-800"; icon = "fa-viruses text-amber-500";
+                    } else if (key === '-+-' || key === '--+' || key === '-++') {
+                        text = "Not typical early pattern. Suggest correlate clinically or repeat RDT if suggestive."; style = "bg-slate-100 border-slate-300 text-slate-700"; icon = "fa-rotate-right text-slate-500";
+                    }
+                } else {
+                    if (key === '+--' || key === '++-') {
+                        text = "Acute dengue infection.<br><span class='text-red-600 block mt-2 font-black uppercase text-sm'>High risk for severe dengue</span>"; style = "bg-red-100 border-red-300 text-red-900"; icon = "fa-triangle-exclamation text-red-600";
+                    } else if (key === '-+-') {
+                        text = "Acute or recent dengue infection"; style = "bg-amber-50 border-amber-200 text-amber-800"; icon = "fa-virus text-amber-500";
+                    } else if (key === '-++' || key === '+++' || key === '+-+') {
+                        text = "Acute, recent or secondary dengue"; style = "bg-amber-50 border-amber-200 text-amber-800"; icon = "fa-viruses text-amber-500";
+                    } else if (key === '--+') {
+                        text = "Unable to rule out secondary dengue. Proceed with dengue IgG high-titre."; style = "bg-blue-50 border-blue-200 text-blue-800"; icon = "fa-magnifying-glass-chart text-blue-500";
+                    }
+                }
+            } else if (key === '---') {
+                if (hist === 'less5') {
+                    text = "Not dengue, but if history suggestive of dengue, repeat RDT"; style = "bg-slate-100 border-slate-300 text-slate-700"; icon = "fa-rotate-right text-slate-500";
+                } else {
+                    text = "Not dengue infection"; style = "bg-emerald-50 border-emerald-200 text-emerald-800"; icon = "fa-shield-virus text-emerald-500";
+                }
+            }
+
+            const card = document.getElementById('rdt-result-card');
+            const iconEl = document.getElementById('rdt-result-icon');
+            const textEl = document.getElementById('rdt-result-text');
+
+            card.className = `p-8 rounded-2xl border-2 text-center transition-all duration-300 shadow-sm ${style}`;
+            iconEl.className = `fa-solid ${icon} text-5xl mb-4`;
+            textEl.innerHTML = text;
+        }
+
+        // Initialization
+        calculateFull();
+        calculateQuick();
+        calculateRDT();
+    </script>
+</body>
+</html>
